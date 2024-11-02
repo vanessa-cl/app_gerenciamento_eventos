@@ -23,5 +23,53 @@ Este é um projeto de aplicativo de desktop para gerenciamento de eventos, desen
  - Uma janela do JavaFX deve abrir com o título "App de Gerenciamento de Eventos" e um botão "Clique aqui".
  
 ### Problemas Comuns
- - **Erro de Configuração do JavaFX:** Certifique-se de que o JavaFX está corretamente configurado no pom.xml e que o caminho do módulo está correto.
  - **Dependências do Maven:** Se houver problemas com dependências, tente executar `mvn clean install` no terminal dentro do diretório do projeto.
+
+## Estrutura de Pastas do Projeto
+A organização das pastas abaixo foi adotada para manter o código limpo, modular e simplificar o desenvolvimento e a manutenção do projeto.
+
+```
+app_gerenciamento_eventos/
+├── src/
+│   ├── main/
+│   │   ├── kotlin/
+│   │   │   ├── ui/
+│   │   │   │   ├── MainApp.kt
+│   │   │   ├── logic/
+│   │   │   │   ├── collections/
+│   │   │   │   │   ├── AgendaPalestras.kt
+│   │   │   │   │   ├── FilaEspera.kt
+│   │   │   │   │   ├── ListaEventos.kt
+│   │   │   │   │   └── ListaParticipantes.kt
+│   │   │   │   ├── entities/
+│   │   │   │   │   ├── Evento.kt
+│   │   │   │   │   ├── Palestra.kt
+│   │   │   │   │   └── Participante.kt
+│   │   │   │   ├── interfaces/
+│   │   │   │   │   ├── Enfileiravel.kt
+│   │   │   │   │   └── Listavel.kt
+│   │   │   │   ├── structures/
+│   │   │   │   │   ├── FilaEstatica.kt
+│   │   │   │   │   └── ListaEstatica.kt
+│   │   │   ├── util/
+│   │   │   │   ├── CustomException.kt
+│   │   │   │   ├── CargoEnum.kt
+│   │   │   │   └── StatusEnum.kt
+│   │   └── resources/
+```
+
+- **ui/:** Contém as classes relacionadas à interface do usuário (JavaFX).  
+  - MainApp.kt: Classe principal que inicia a aplicação.
+- **logic/:** Contém a lógica principal da aplicação.  
+- **entities/:** Contém as classes que representam as entidades principais do sistema.
+  - Evento.kt, Palestra.kt, Participante.kt: Classes que representam as entidades do sistema.
+- **collections/:** Contém as classes que implementam coleções específicas.
+  - ListaParticipantes.kt, AgendaPalestras.kt, FilaEspera.kt, ListaEventos.kt: Classes que utilizam estruturas de dados específicas para gerenciar listas e filas.
+- **interfaces/:** Contém as interfaces que definem contratos para as estruturas.
+  ListInterface.kt: Interface que define os métodos que devem ser implementados pelas coleções.
+- **structures/:** Contém as classes que implementam estruturas de dados genéricas.
+  - ListaEstatica.kt, FilaEstatica.kt: Classes que implementam listas e filas estáticas que serão utilizadas pelas coleções.
+- **util/:** Contém classes utilitárias e enums.  
+    - CustomExceptions.kt: Define exceções personalizadas.
+    - CargoEnum.kt, StatusEnum.kt: Define enums utilizados no sistema.
+- **resources/:** Contém recursos adicionais como arquivos de configuração e arquivos FXML para JavaFX.
