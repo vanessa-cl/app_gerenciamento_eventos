@@ -1,1 +1,1 @@
-# palestras-app
+# App de Gerenciamento de Eventos
