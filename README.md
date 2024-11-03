@@ -12,7 +12,7 @@ Este é um projeto de aplicativo de desktop para gerenciamento de eventos, desen
  
 ### Passos
  - Abra o terminal e execute o seguinte comando para clonar o repositório:  
- `git clone git@github.com:vanessa-cl/app_gerenciamento_eventos.git`
+ `git clone https://github.com/vanessa-cl/app_gerenciamento_eventos.git`
  - Abra o IntelliJ IDEA.
  - Selecione File -> Open e navegue até o diretório onde você clonou o repositório.
  - Selecione a pasta app_gerenciamento_eventos e clique em OK.
