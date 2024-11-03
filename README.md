@@ -61,14 +61,14 @@ app_gerenciamento_eventos/
 - **ui/:** Contém as classes relacionadas à interface do usuário (JavaFX).  
   - MainApp.kt: Classe principal que inicia a aplicação.
 - **logic/:** Contém a lógica principal da aplicação.  
-- **entities/:** Contém as classes que representam as entidades principais do sistema.
-  - Evento.kt, Palestra.kt, Participante.kt: Classes que representam as entidades do sistema.
-- **collections/:** Contém as classes que implementam coleções específicas.
-  - ListaParticipantes.kt, AgendaPalestras.kt, FilaEspera.kt, ListaEventos.kt: Classes que utilizam estruturas de dados específicas para gerenciar listas e filas.
-- **interfaces/:** Contém as interfaces que definem contratos para as estruturas.
-  ListInterface.kt: Interface que define os métodos que devem ser implementados pelas coleções.
-- **structures/:** Contém as classes que implementam estruturas de dados genéricas.
-  - ListaEstatica.kt, FilaEstatica.kt: Classes que implementam listas e filas estáticas que serão utilizadas pelas coleções.
+  - **entities/:** Contém as classes que representam as entidades principais do sistema.
+    - Evento.kt, Palestra.kt, Participante.kt: Classes que representam as entidades do sistema.
+  - **collections/:** Contém as classes que implementam coleções específicas.
+    - ListaParticipantes.kt, AgendaPalestras.kt, FilaEspera.kt, ListaEventos.kt: Classes que utilizam estruturas de dados específicas para gerenciar listas e filas.
+  - **interfaces/:** Contém as interfaces que definem contratos para as estruturas.
+    ListInterface.kt: Interface que define os métodos que devem ser implementados pelas coleções.
+  - **structures/:** Contém as classes que implementam estruturas de dados genéricas.
+    - ListaEstatica.kt, FilaEstatica.kt: Classes que implementam listas e filas estáticas que serão utilizadas pelas coleções.
 - **util/:** Contém classes utilitárias e enums.  
     - CustomExceptions.kt: Define exceções personalizadas.
     - CargoEnum.kt, StatusEnum.kt: Define enums utilizados no sistema.
