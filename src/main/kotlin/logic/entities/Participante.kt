@@ -1,21 +1,19 @@
 package logic.entities
 
-class Participante {
-    private var Int id
-    private var String nome
-    private var String email
-    private var String cpf
-    private var String cargo
-    private var AgendaPalestras agenda
+import logic.collections.AgendaPalestras
 
+class Participante(
+    private var id: Int,
+    private var nome: String,
+    private var email: String,
+    private var cpf: String,
+    private var cargo: String
+) {
+    private var agenda: AgendaPalestras = AgendaPalestras()
 
-fun constructor(nome: String, email: String, cpf: String, cargo: String) {
-    this.nome = nome
-    this.email = email
-    this.cpf = cpf
-    this.cargo = cargo
-
-}
+    fun getId(): Int {
+        return id
+    }
 
     fun getNome(): String {
         return nome
@@ -36,3 +34,5 @@ fun constructor(nome: String, email: String, cpf: String, cargo: String) {
     fun getPalestrasInscritas(): AgendaPalestras {
         return agenda
     }
+
+}
