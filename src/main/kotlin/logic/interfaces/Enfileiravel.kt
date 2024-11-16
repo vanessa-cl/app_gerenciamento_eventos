@@ -1,6 +1,6 @@
 package logic.interfaces
 
-interface Enfileiravel{
+interface Enfileiravel<T> {
     fun enfileirar(dado: T?)
     fun desenfileirar(): T?
     fun atualizar(dado: T?)

@@ -1,17 +1,12 @@
 package logic.structures
 
-class FilaEstatica : Enfileiravel {
-    private Int ponteiroInicio
-    private Int ponteiroFim
-    private Int tamanho
-    private Array<T?> dados
+import logic.interfaces.Enfileiravel
 
-    constructor(tamanho: Int) {
-        this.ponteiroInicio = 0
-        this.ponteiroFim = 0
-        this.tamanho = tamanho
-        this.dados = arrayOfNulls(tamanho)
-    }
+class FilaEstatica<T> : Enfileiravel<T> {
+    private var ponteiroInicio = 0
+    private var ponteiroFim = 0
+    private var tamanho = 10
+    private var dados: Array<Any?> = arrayOfNulls(tamanho)
 
     override fun enfileirar(dado: T?) {
         if (!estaCheia()) {
@@ -25,7 +20,7 @@ class FilaEstatica : Enfileiravel {
             val temp = dados[ponteiroInicio]
             dados[ponteiroInicio] = null
             ponteiroInicio = (ponteiroInicio + 1) % tamanho
-            return temp
+            return temp as T?
         }
         return null
     }
@@ -38,7 +33,7 @@ class FilaEstatica : Enfileiravel {
 
     override fun frente(): T? {
         if (!estaVazia()) {
-            return dados[ponteiroInicio]
+            return dados[ponteiroInicio] as T?
         }
         return null
     }
@@ -61,4 +56,5 @@ class FilaEstatica : Enfileiravel {
         }
         return result
     }
+}
 
