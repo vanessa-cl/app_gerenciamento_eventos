@@ -1,8 +1,8 @@
 package logic.interfaces
 
-interface Listavel {
+interface Listavel<T> {
     fun anexar(dado: T)
-    fun Inserir(posicao: Int, dado: T)
+    fun inserir(posicao: Int, dado: T)
     fun selecionar(posicao: Int): T?
     fun selecionarTodos(): Array<T?>
     fun buscarPosicao(dado: T?): Int

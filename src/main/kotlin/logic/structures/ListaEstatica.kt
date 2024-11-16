@@ -1,11 +1,13 @@
 package logic.structures
 
-class ListaEstatica : Listavel {
-    private var Int ponteiroInicio
-    private var Int ponteiroFim
-    private var Int quantidade
-    private var Int tamanho
-    private var Array<T?> dados
+import logic.interfaces.Listavel
+
+class ListaEstatica<T> : Listavel<T> {
+    private var ponteiroInicio = 0
+    private var ponteiroFim = -1
+    private var quantidade = 0
+    private var tamanho = 10
+    private var dados: Array<Any?> = arrayOfNulls(tamanho)
 
 
     override fun anexar(dado: T) {
@@ -16,7 +18,7 @@ class ListaEstatica : Listavel {
         }
     }
 
-    override fun Inserir(posicao: Int, dado: T) {
+    override fun inserir(posicao: Int, dado: T) {
         if (posicao >= 0 && posicao < tamanho) {
             val posicaoReal = (ponteiroInicio + posicao) % tamanho
             if (dados[posicaoReal] == null) {
@@ -29,13 +31,13 @@ class ListaEstatica : Listavel {
     override fun selecionar(posicao: Int): T? {
         if (posicao >= 0 && posicao < tamanho) {
             val posicaoReal = (ponteiroInicio + posicao) % tamanho
-            return dados[posicaoReal]
+            return dados[posicaoReal] as T?
         }
         return null
     }
 
     override fun selecionarTodos(): Array<T?> {
-        return dados
+        return dados as Array<T?>
     }
 
     override fun buscarPosicao(dado: T?): Int {
@@ -60,7 +62,7 @@ class ListaEstatica : Listavel {
             val posicaoReal = (ponteiroInicio + posicao) % tamanho
             val dado = dados[posicaoReal]
             dados[posicaoReal] = null
-            return dado
+            return dado as T?
         }
         return null
     }
@@ -69,7 +71,7 @@ class ListaEstatica : Listavel {
         val dadosRemovidos = dados
         dados = arrayOfNulls(tamanho)
         quantidade = 0
-        return dadosRemovidos
+        return dadosRemovidos as Array<T?>
     }
 
     override fun estaVazia(): Boolean {
