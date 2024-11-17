@@ -61,8 +61,8 @@ class Palestra(
         return horarioFim
     }
 
-    fun getParticipantes(): ListaParticipantes {
-        return participantes
+    fun getParticipantes() {
+//        return participantes.buscarTodosParticipantes()
     }
 
     fun getFilaEspera(): FilaEspera {

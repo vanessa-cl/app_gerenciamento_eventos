@@ -2,6 +2,7 @@ package logic.structures
 
 import logic.interfaces.Listavel
 
+
 class ListaEstatica<T> : Listavel<T> {
     private var ponteiroInicio = 0
     private var ponteiroFim = -1
@@ -12,8 +13,11 @@ class ListaEstatica<T> : Listavel<T> {
 
     override fun anexar(dado: T) {
         if (!estaCheia()) {
+            ponteiroFim++
+            if (ponteiroFim == tamanho) {
+                ponteiroFim = 0
+            }
             dados[ponteiroFim] = dado
-            ponteiroFim = (ponteiroFim + 1) % tamanho
             quantidade++
         }
     }
@@ -36,8 +40,8 @@ class ListaEstatica<T> : Listavel<T> {
         return null
     }
 
-    override fun selecionarTodos(): Array<T?> {
-        return dados as Array<T?>
+    override fun selecionarTodos(): Array<Any?> {
+        return dados
     }
 
     override fun buscarPosicao(dado: T?): Int {

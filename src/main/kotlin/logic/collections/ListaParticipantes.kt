@@ -39,8 +39,8 @@ class ListaParticipantes {
         return null
     }
 
-    fun buscarTodosParticipantes(): Array<Participante?> {
-        return participantes.selecionarTodos()
+    fun buscarTodosParticipantes() {
+//        return participantes.selecionarTodos()
     }
 
     fun estaCheia(): Boolean {

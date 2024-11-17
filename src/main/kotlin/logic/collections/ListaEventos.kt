@@ -2,6 +2,7 @@ package logic.collections
 
 import logic.entities.Evento
 import logic.structures.ListaEstatica
+import util.convertArray
 
 class ListaEventos {
     private var eventos = ListaEstatica<Evento>()
@@ -41,7 +42,12 @@ class ListaEventos {
     }
 
     fun buscarTodosEventos(): Array<Evento?> {
-        return eventos.selecionarTodos()
+        if (eventos.estaVazia()) {
+            return emptyArray()
+        }
+        val todosEventos = eventos.selecionarTodos()
+        val todosEventosConv = convertArray<Evento?>(todosEventos)
+        return todosEventosConv
     }
 
 }
