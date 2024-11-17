@@ -8,6 +8,7 @@ import java.time.LocalDate
 import java.time.LocalTime
 
 class Palestra(
+    private var id: Int,
     private var titulo: String,
     private var palestrante: String,
     private var limiteParticipantes: Int,
@@ -16,7 +17,6 @@ class Palestra(
     private var horarioInicio: LocalTime,
     private var horarioFim: LocalTime
 ) {
-    private var id = SequentialId().gerarId()
     private var status = StatusEnum.PENDENTE
     private var participantes = ListaParticipantes()
     private var filaEspera = FilaEspera()
@@ -61,8 +61,8 @@ class Palestra(
         return horarioFim
     }
 
-    fun getParticipantes() {
-//        return participantes.buscarTodosParticipantes()
+    fun getParticipantes(): ListaParticipantes {
+        return participantes
     }
 
     fun getFilaEspera(): FilaEspera {

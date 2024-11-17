@@ -35,7 +35,8 @@ fun menuGerenciarEventos() {
             1 -> telaGerenciarEventos.cadastrarEvento()
             2 -> telaGerenciarEventos.exibirEventos()
             3 -> menuGerenciarPalestras(telaGerenciarEventos.todosEventos)
-            else -> encerrar = true
+            4 -> encerrar = true
+            else -> println("Opção inválida! Tente novamente")
         }
     }
 }
@@ -58,6 +59,7 @@ fun menuGerenciarPalestras(eventos: ListaEventos) {
                 5 -> telaGerenciarPalestras.consultarParticipantes()
                 6 -> telaGerenciarPalestras.consultarListaEspera()
                 7 -> voltar = true
+                else -> println("Opção inválida! Tente novamente")
             }
         }
     } else {

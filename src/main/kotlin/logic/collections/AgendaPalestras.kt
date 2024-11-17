@@ -3,6 +3,7 @@ package logic.collections
 import logic.entities.Evento
 import logic.entities.Palestra
 import logic.structures.ListaEstatica
+import util.convertArray
 import java.time.LocalDate
 import java.time.LocalTime
 
@@ -69,13 +70,9 @@ class AgendaPalestras {
             // TODO: erro de lista vazia
             return emptyArray()
         }
-//        val todasPalestras = palestras.selecionarTodos() as Array<Palestra?>
-//        val palestrasArray = arrayOfNulls<Palestra>(todasPalestras.size)
-//        for (i in todasPalestras.indices) {
-//            palestrasArray[i] = todasPalestras[i]
-//        }
-//        return palestrasArray
-        return emptyArray()
+        val todasPalestras = palestras.selecionarTodos()
+        val palestrasArray = convertArray<Palestra?>(todasPalestras)
+        return palestrasArray
     }
 
     fun buscarTodasPalestrasPorDia(data: LocalDate): Array<Palestra?> {

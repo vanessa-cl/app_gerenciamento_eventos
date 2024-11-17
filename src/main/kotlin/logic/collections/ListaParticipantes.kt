@@ -2,6 +2,7 @@ package logic.collections
 
 import logic.entities.Participante
 import logic.structures.ListaEstatica
+import util.convertArray
 
 class ListaParticipantes {
     private var participantes = ListaEstatica<Participante>()
@@ -39,8 +40,13 @@ class ListaParticipantes {
         return null
     }
 
-    fun buscarTodosParticipantes() {
-//        return participantes.selecionarTodos()
+    fun buscarTodosParticipantes(): Array<Participante?> {
+        if (participantes.estaVazia()) {
+            return emptyArray()
+        }
+        val todosParticipantes = participantes.selecionarTodos()
+        val participantesConv = convertArray<Participante?>(todosParticipantes)
+        return participantesConv
     }
 
     fun estaCheia(): Boolean {

@@ -2,22 +2,26 @@ package ui
 
 import logic.collections.ListaEventos
 import logic.entities.Evento
+import util.SequentialId
 import java.time.LocalDate
 
 class GerenciarEventos {
     var todosEventos = ListaEventos()
+    private var id = SequentialId()
 
     fun mostrarMenuColaborador() {
         println("Gerenciamento de Eventos")
         println("1 - Cadastrar novo evento")
         println("2 - Listar eventos")
         println("3 - Gerenciar palestras")
+        println("4 - Encerrar programa")
     }
 
     fun cadastrarEvento() {
         val eventoTeste = Evento(
+            id.gerarId(),
             "Conferência de Kotlin",
-            "Evento para reunir desenvolvedores e entusiastas da linguagem de programação Kotlin",
+            "Evento da linguagem Kotlin",
             20.0,
             LocalDate.parse("2024-10-01"),
             LocalDate.parse("2024-10-08")
@@ -42,13 +46,15 @@ class GerenciarEventos {
     fun exibirEventos() {
         println("Eventos cadastrados:")
         val eventos = todosEventos.buscarTodosEventos()
+        println("_______________________________________________________________________________________________________________________________")
+        println("ID | Nome                     | Data de início | Data de término | Descrição                  | Valor da inscrição")
+        println("_______________________________________________________________________________________________________________________________")
         for (evento in eventos) {
-            println("Nome: ${evento?.getNome()}")
-//            println("Data de início: ${evento?.getDataInicio()}")
-//            println("Data de término: ${evento?.getDataFim()}")
-//            println("Descrição: ${evento?.getDescricao()}")
-//            println("Valor da inscrição: ${evento?.getValorInscricao()}")
-            println("_________________________________________________________")
+            if (evento == null) {
+                continue
+            }
+            println("${evento.getId()}  | ${evento.getNome()}    | ${evento.getDataInicio()}     | ${evento.getDataFim()}      | ${evento.getDescricao()} | ${evento.getValorInscricao()}")
+            println("_______________________________________________________________________________________________________________________________")
         }
     }
 }
