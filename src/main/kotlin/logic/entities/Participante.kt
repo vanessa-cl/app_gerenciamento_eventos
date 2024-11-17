@@ -1,14 +1,16 @@
 package logic.entities
 
 import logic.collections.AgendaPalestras
+import util.CargoEnum
+import util.SequentialId
 
 class Participante(
-    private var id: Int,
     private var nome: String,
     private var email: String,
     private var cpf: String,
-    private var cargo: String
+    private var cargo: CargoEnum
 ) {
+    private var id = SequentialId().gerarId()
     private var agenda: AgendaPalestras = AgendaPalestras()
 
     fun getId(): Int {
@@ -27,7 +29,7 @@ class Participante(
         return cpf
     }
 
-    fun getCargo(): String {
+    fun getCargo(): CargoEnum {
         return cargo
     }
 

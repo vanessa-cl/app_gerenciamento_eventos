@@ -2,12 +2,12 @@ package logic.entities
 
 import logic.collections.FilaEspera
 import logic.collections.ListaParticipantes
+import util.SequentialId
 import util.StatusEnum
 import java.time.LocalDate
 import java.time.LocalTime
 
 class Palestra(
-    private var id: Int,
     private var titulo: String,
     private var palestrante: String,
     private var limiteParticipantes: Int,
@@ -16,6 +16,7 @@ class Palestra(
     private var horarioInicio: LocalTime,
     private var horarioFim: LocalTime
 ) {
+    private var id = SequentialId().gerarId()
     private var status = StatusEnum.PENDENTE
     private var participantes = ListaParticipantes()
     private var filaEspera = FilaEspera()

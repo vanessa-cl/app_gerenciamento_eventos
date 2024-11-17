@@ -8,6 +8,7 @@ class ListaEventos {
 
     fun inserirEvento(evento: Evento) {
         eventos.anexar(evento)
+
     }
 
     fun removerEventoPeloNome(nome: String): Evento? {
