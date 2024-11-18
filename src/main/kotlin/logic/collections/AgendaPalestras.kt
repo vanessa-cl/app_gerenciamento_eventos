@@ -1,6 +1,5 @@
 package logic.collections
 
-import logic.entities.Evento
 import logic.entities.Palestra
 import logic.structures.ListaEstatica
 import util.convertArray

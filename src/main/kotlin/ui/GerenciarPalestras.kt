@@ -21,46 +21,46 @@ class GerenciarPalestras(private val evento: Evento) {
     }
 
     fun cadastrarPalestra() {
-//        val palestraTeste = Palestra(
-//            id.gerarId(),
-//            "Introdução ao Kotlin",
-//            "Erica Meire",
-//            50,
-//            "H408",
-//            LocalDate.parse("2024-10-06"),
-//            LocalTime.parse("19:00"),
-//            LocalTime.parse("20:00")
-//        )
-//        evento.getAgenda().inserirPalestra(palestraTeste)
-        println("Digite o título da palestra:")
-        val tituloPalestra = readln()
-        println("Digite o nome do palestrante:")
-        val nomePalestrante = readln()
-        println("Digite a data da palestra (YYYY-MM-DD):")
-        val dataPalestra = readln()
-        println("Digite o local da palestra:")
-        val localPalestra = readln()
-        println("Digite o limite de participantes:")
-        val limiteParticipantes = readln().toInt()
-        println("Digite o horário de início:")
-        val horarioInicio = readln()
-        println("Digite o horário de término:")
-        val horarioTermino = readln()
-        val novaPalestra = Palestra(
+        val palestraTeste = Palestra(
             id.gerarId(),
-            tituloPalestra,
-            nomePalestrante,
-            limiteParticipantes,
-            localPalestra,
-            LocalDate.parse(dataPalestra),
-            LocalTime.parse(horarioInicio),
-            LocalTime.parse(horarioTermino)
+            "Introdução ao Kotlin",
+            "Erica Meire",
+            50,
+            "H408",
+            LocalDate.parse("2024-10-06"),
+            LocalTime.parse("19:00"),
+            LocalTime.parse("20:00")
         )
-        val sucesso = evento.getAgenda().inserirPalestra(novaPalestra)
-        if (!sucesso) {
-            println("Erro ao cadastrar palestra! Conflito de horários")
-            return
-        }
+        evento.getAgenda().inserirPalestra(palestraTeste)
+//        println("Digite o título da palestra:")
+//        val tituloPalestra = readln()
+//        println("Digite o nome do palestrante:")
+//        val nomePalestrante = readln()
+//        println("Digite a data da palestra (YYYY-MM-DD):")
+//        val dataPalestra = readln()
+//        println("Digite o local da palestra:")
+//        val localPalestra = readln()
+//        println("Digite o limite de participantes:")
+//        val limiteParticipantes = readln().toInt()
+//        println("Digite o horário de início:")
+//        val horarioInicio = readln()
+//        println("Digite o horário de término:")
+//        val horarioTermino = readln()
+//        val novaPalestra = Palestra(
+//            id.gerarId(),
+//            tituloPalestra,
+//            nomePalestrante,
+//            limiteParticipantes,
+//            localPalestra,
+//            LocalDate.parse(dataPalestra),
+//            LocalTime.parse(horarioInicio),
+//            LocalTime.parse(horarioTermino)
+//        )
+//        val sucesso = evento.getAgenda().inserirPalestra(novaPalestra)
+//        if (!sucesso) {
+//            println("Erro ao cadastrar palestra! Conflito de horários")
+//            return
+//        }
         println("Palestra cadastrada com sucesso!")
     }
 
@@ -68,7 +68,6 @@ class GerenciarPalestras(private val evento: Evento) {
         val palestras = evento.getAgenda().buscarTodasPalestras()
         println("_______________________________________________________________________________________________________________________________")
         println("ID | Título                  | Palestrante     | Local | Data       | Início | Término | Limite Part. | Status ")
-//      println("1  | Introdução ao Kotlin    | Erica Meire     | H408  | 2024-12-01 | 19:00  | 20:00   | 50           | Pendente")
         println("_______________________________________________________________________________________________________________________________")
         for (palestra in palestras) {
             if (palestra == null) {

@@ -2,6 +2,8 @@ package ui
 
 import logic.collections.ListaEventos
 import logic.entities.Evento
+import logic.entities.Participante
+import util.CargoEnum
 import java.time.LocalDate
 
 //import javafx.application.Application
@@ -20,22 +22,21 @@ import java.time.LocalDate
 //    }
 //}
 
-fun main() {
-    // menu de colaboradores
-    menuGerenciarEventos()
-}
+val usuarioTesteColaborador = Participante(1, "João", "joao123@email.com", "123456", CargoEnum.COLABORADOR)
+val usuarioTesteOuvinte = Participante(2, "Alana", "alana321@email.com", "654321", CargoEnum.OUVINTE)
 
-fun menuGerenciarEventos() {
-    val telaGerenciarEventos = GerenciarEventos()
+fun main() {
+    val menuEventos = MenuEventos()
+    var opcaoLogin: Int
     var encerrar = false
     while (!encerrar) {
-        telaGerenciarEventos.mostrarMenuColaborador()
-        val opcao = readln().toInt()
-        when (opcao) {
-            1 -> telaGerenciarEventos.cadastrarEvento()
-            2 -> telaGerenciarEventos.exibirEventos()
-            3 -> menuGerenciarPalestras(telaGerenciarEventos.todosEventos)
-            4 -> encerrar = true
+        println("Digite 1 para colaborador, 2 para ouvinte ou 3 para encerrar:")
+        opcaoLogin = readln().toInt()
+        val usuario = if (opcaoLogin == 1) usuarioTesteColaborador else usuarioTesteOuvinte
+        when (opcaoLogin) {
+            1 -> menuEventos.mostrarMenuColaborador()
+            2 -> menuEventos.mostrarMenuOuvinte(usuario)
+            3 -> encerrar = true
             else -> println("Opção inválida! Tente novamente")
         }
     }
@@ -66,3 +67,4 @@ fun menuGerenciarPalestras(eventos: ListaEventos) {
         println("Evento não encontrado")
     }
 }
+

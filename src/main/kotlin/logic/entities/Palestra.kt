@@ -2,7 +2,6 @@ package logic.entities
 
 import logic.collections.FilaEspera
 import logic.collections.ListaParticipantes
-import util.SequentialId
 import util.StatusEnum
 import java.time.LocalDate
 import java.time.LocalTime

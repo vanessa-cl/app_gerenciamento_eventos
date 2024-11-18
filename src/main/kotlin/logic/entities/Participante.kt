@@ -2,7 +2,6 @@ package logic.entities
 
 import logic.collections.AgendaPalestras
 import util.CargoEnum
-import util.SequentialId
 
 class Participante(
     private var id: Int,
