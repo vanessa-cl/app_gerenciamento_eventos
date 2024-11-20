@@ -7,10 +7,10 @@ import java.time.LocalDate
 import java.time.LocalTime
 
 class AgendaPalestras {
-    private var palestras = ListaEstatica<Palestra>()
+    private var palestras = ListaEstatica<Palestra>(10)
 
     fun inserirPalestra(palestra: Palestra): Boolean {
-        var conflito = verificarConflitoHorarios(palestra.getHorarioInicio(), palestra.getHorarioFim())
+        val conflito = verificarConflitoHorarios(palestra.getHorarioInicio(), palestra.getHorarioFim())
         if (conflito) {
             // TODO: erro de conflito de horários
             return false
@@ -20,8 +20,8 @@ class AgendaPalestras {
     }
 
     fun atualizarHorarioPalestra(palestra: Palestra, horarioInicio: LocalTime, horarioFim: LocalTime): Boolean {
-        var resultado = buscarPalestraPeloTitulo(palestra.getTitulo())
-        var conflito = verificarConflitoHorarios(horarioInicio, horarioFim)
+        val resultado = buscarPalestraPeloTitulo(palestra.getTitulo())
+        val conflito = verificarConflitoHorarios(horarioInicio, horarioFim)
         if (conflito) {
             // TODO: erro de conflito de horários
             return false
@@ -44,7 +44,7 @@ class AgendaPalestras {
     }
 
     fun removerPalestraPeloTitulo(titulo: String): Palestra? {
-        var resultado = buscarPalestraPeloTitulo(titulo)
+        val resultado = buscarPalestraPeloTitulo(titulo)
         if (resultado != null) {
             palestras.apagar(palestras.buscarPosicao(resultado))
             return resultado
@@ -78,7 +78,7 @@ class AgendaPalestras {
         if (estaVazia()) {
             // TODO: erro de lista vazia
         }
-        var resultado: Array<Palestra?> = arrayOfNulls(palestras.selecionarTodos().size)
+        val resultado: Array<Palestra?> = arrayOfNulls(palestras.selecionarTodos().size)
         for (i in 0 until palestras.selecionarTodos().size) {
             val palestra = palestras.selecionar(i)
             if (palestra != null && palestra.getData() == data) {
@@ -92,7 +92,7 @@ class AgendaPalestras {
         if (estaVazia()) {
             // TODO: erro de lista vazia
         }
-        var resultado: Array<Palestra?> = arrayOfNulls(palestras.selecionarTodos().size)
+        val resultado: Array<Palestra?> = arrayOfNulls(palestras.selecionarTodos().size)
         for (i in 0 until palestras.selecionarTodos().size) {
             val palestra = palestras.selecionar(i)
             if (palestra != null && palestra.getHorarioInicio() == horarioInicio && palestra.getHorarioFim() == horarioFim) {

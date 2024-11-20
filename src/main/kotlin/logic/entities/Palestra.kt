@@ -17,7 +17,7 @@ class Palestra(
     private var horarioFim: LocalTime
 ) {
     private var status = StatusEnum.PENDENTE
-    private var participantes = ListaParticipantes()
+    private var participantes = ListaParticipantes(limiteParticipantes)
     private var filaEspera = FilaEspera()
 
     fun getId(): Int {

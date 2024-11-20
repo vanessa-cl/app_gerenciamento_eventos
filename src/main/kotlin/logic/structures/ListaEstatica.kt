@@ -3,11 +3,11 @@ package logic.structures
 import logic.interfaces.Listavel
 
 
-class ListaEstatica<T> : Listavel<T> {
+class ListaEstatica<T>(private var tamanho: Int) : Listavel<T> {
     private var ponteiroInicio = 0
     private var ponteiroFim = -1
     private var quantidade = 0
-    private var tamanho = 10
+    //    private var tamanho = 10
     private var dados: Array<Any?> = arrayOfNulls(tamanho)
 
 

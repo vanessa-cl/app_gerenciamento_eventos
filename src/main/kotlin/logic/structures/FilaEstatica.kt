@@ -57,8 +57,8 @@ class FilaEstatica<T> : Enfileiravel<T> {
         return result
     }
 
-    fun buscarDados(): Array<T?> {
-        return dados as Array<T?>
+    fun buscarDados(): Array<Any?> {
+        return dados
     }
 }
 

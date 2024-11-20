@@ -5,15 +5,14 @@ import logic.structures.ListaEstatica
 import util.convertArray
 
 class ListaEventos {
-    private var eventos = ListaEstatica<Evento>()
+    private var eventos = ListaEstatica<Evento>(10)
 
     fun inserirEvento(evento: Evento) {
         eventos.anexar(evento)
-
     }
 
     fun removerEventoPeloNome(nome: String): Evento? {
-        var evento = buscarEventoPeloNome(nome)
+        val evento = buscarEventoPeloNome(nome)
         if (evento != null) {
             eventos.apagar(eventos.buscarPosicao(evento))
             return evento
@@ -49,5 +48,4 @@ class ListaEventos {
         val todosEventosConv = convertArray<Evento?>(todosEventos)
         return todosEventosConv
     }
-
 }

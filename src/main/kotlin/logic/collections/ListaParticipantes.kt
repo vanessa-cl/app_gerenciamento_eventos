@@ -4,15 +4,15 @@ import logic.entities.Participante
 import logic.structures.ListaEstatica
 import util.convertArray
 
-class ListaParticipantes {
-    private var participantes = ListaEstatica<Participante>()
+class ListaParticipantes(private var limiteParticipantes: Int) {
+    private var participantes = ListaEstatica<Participante>(limiteParticipantes)
 
     fun inserirParticipante(participante: Participante) {
         participantes.anexar(participante)
     }
 
     fun removerParticipantePeloNome(nome: String): Participante? {
-        var participante = buscarParticipantePeloNome(nome)
+        val participante = buscarParticipantePeloNome(nome)
         if (participante != null) {
             participantes.apagar(participantes.buscarPosicao(participante))
             return participante
