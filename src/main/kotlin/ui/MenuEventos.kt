@@ -7,8 +7,9 @@ import util.SequentialId
 import java.time.LocalDate
 
 class MenuEventos() {
-    var todosEventos = ListaEventos()
+    private var todosEventos = ListaEventos()
     private var id = SequentialId()
+    private var menuGerenciarPalestras = GerenciarPalestras()
 
     fun mostrarMenuColaborador() {
         var voltar = false
@@ -22,7 +23,7 @@ class MenuEventos() {
             when (opcao) {
                 1 -> cadastrarEvento()
                 2 -> exibirEventos()
-                3 -> menuGerenciarPalestras(todosEventos)
+                3 -> menuGerenciarPalestras.mostrarMenuGerenciarPalestras(todosEventos)
                 4 -> voltar = true
                 else -> println("Opção inválida! Tente novamente")
             }
@@ -30,7 +31,7 @@ class MenuEventos() {
 
     }
 
-    fun cadastrarEvento() {
+    private fun cadastrarEvento() {
         val eventoTeste = Evento(
             id.gerarId(),
             "Conferência de Kotlin",
@@ -59,6 +60,10 @@ class MenuEventos() {
     private fun exibirEventos() {
         println("Eventos cadastrados:")
         val eventos = todosEventos.buscarTodosEventos()
+        if (eventos == null) {
+            println("Não há eventos cadastrados!")
+            return
+        }
         println("_______________________________________________________________________________________________________________________________")
         println("ID | Nome                     | Data de início | Data de término | Descrição                  | Valor da inscrição")
         println("_______________________________________________________________________________________________________________________________")
@@ -96,6 +101,10 @@ class MenuEventos() {
     private fun consultarAgenda(evento: Evento, participante: Participante) {
         println("Agenda do Evento ${evento.getNome()}")
         val palestras = evento.getAgenda().buscarTodasPalestras()
+        if (palestras == null) {
+            println("Não há palestras cadastradas para este evento")
+            return
+        }
         println("_______________________________________________________________________________________________________________________________")
         println("ID | Título                  | Palestrante     | Local | Data       | Início | Término | Limite Part. | Status ")
         println("_______________________________________________________________________________________________________________________________")
@@ -106,33 +115,44 @@ class MenuEventos() {
             println("${palestra.getId()}  | ${palestra.getTitulo()}    | ${palestra.getPalestrante()}     | ${palestra.getLocal()}      | ${palestra.getData()} | ${palestra.getHorarioInicio()} | ${palestra.getHorarioFim()} | ${palestra.getLimiteParticipantes()} | ${palestra.getStatus()}")
             println("_______________________________________________________________________________________________________________________________")
         }
+
         println("Digite o nome de uma palestra para se inscrever ou X para voltar:")
         val entrada = readln()
         if (entrada == "X") {
             return
         }
         val palestra = evento.getAgenda().buscarPalestraPeloTitulo(entrada)
-        if (palestra != null) {
-            if (palestra.getParticipantes().buscarTodosParticipantes().size == palestra.getLimiteParticipantes()) {
-                println("A palestra ${palestra.getTitulo()} atingiu o limite de participantes. Deseja entrar na lista de espera? (S/N)")
-                val opcao = readln()
-                if (opcao == "S") {
-                    palestra.getFilaEspera().inserirParticipanteFim(participante)
-                    println("Inscrição na lista de espera realizada com sucesso!")
-                    return
-                }
-
-            }
-            palestra.getParticipantes().inserirParticipante(participante)
-            participante.getPalestrasInscritas().inserirPalestra(palestra)
-            println("Inscrição realizada com sucesso!")
+        if (palestra == null) {
+            println("Palestra não encontrada!")
             return
         }
+        if (palestra.getParticipantes().estaCheia()) {
+            println("A palestra ${palestra.getTitulo()} atingiu o limite de participantes. Deseja entrar na lista de espera? (S/N)")
+            val opcao = readln()
+            if (opcao == "S") {
+                palestra.getFilaEspera().inserirParticipanteFim(participante)
+                println("Inscrição na lista de espera realizada com sucesso!")
+                return
+            }
+            return
+        }
+        val sucessoPalestra = palestra.getParticipantes().inserirParticipante(participante)
+        val sucessoParticipante = participante.getPalestrasInscritas().inserirPalestra(palestra)
+        if (!sucessoPalestra && !sucessoParticipante) {
+            println("Erro ao se inscrever na palestra!")
+            return
+        }
+        println("Inscrição realizada com sucesso!")
+        return
     }
 
     private fun minhasInscricoes(evento: Evento, participante: Participante) {
         println("Minhas inscrições no Evento ${evento.getNome()}:")
         val inscricoes = participante.getPalestrasInscritas().buscarTodasPalestras()
+        if (inscricoes == null) {
+            println("Você não está inscrito em nenhuma palestra")
+            return
+        }
         println("_______________________________________________________________________________________________________________________________")
         println("ID | Título                  | Palestrante     | Local | Data       | Início | Término | Limite Part. | Status ")
         println("_______________________________________________________________________________________________________________________________")
@@ -149,19 +169,28 @@ class MenuEventos() {
             return
         }
         val palestra = evento.getAgenda().buscarPalestraPeloTitulo(entrada)
-        if (palestra != null) {
-            println("Tem certeza que deseja cancelar a inscrição na palestra ${palestra.getTitulo()}? (S/N)")
-            entrada = readln()
-            if (entrada == "S") {
-                val sucessoPalestra = palestra.getParticipantes().removerParticipantePeloNome(participante.getNome())
-                val sucessoParticipante =
-                    participante.getPalestrasInscritas().removerPalestraPeloTitulo(palestra.getTitulo())
-                if (sucessoPalestra != null && sucessoParticipante != null) {
-                    println("Inscrição cancelada com sucesso!")
-                    return
-                }
-            }
+        if (palestra == null) {
+            println("Palestra não encontrada!")
             return
         }
+        println("Tem certeza que deseja cancelar a inscrição na palestra ${palestra.getTitulo()}? (S/N)")
+        entrada = readln()
+        if (entrada == "N") {
+            return
+        }
+        val sucessoPalestra = palestra.getParticipantes().removerParticipantePeloNome(participante.getNome())
+        val sucessoParticipante =
+            participante.getPalestrasInscritas().removerPalestraPeloTitulo(palestra.getTitulo())
+        if (!sucessoPalestra && !sucessoParticipante) {
+            println("Erro ao cancelar inscrição!")
+            return
+        }
+        println("Inscrição cancelada com sucesso!")
+        if (palestra.getFilaEspera().estaVazia()) {
+            return
+        }
+        val participanteFilaEspera = palestra.getFilaEspera().removerParticipanteInicio() ?: return
+        palestra.getParticipantes().inserirParticipante(participanteFilaEspera)
+        return
     }
 }

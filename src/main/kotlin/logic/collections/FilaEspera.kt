@@ -2,6 +2,7 @@ package logic.collections
 
 import logic.entities.Participante
 import logic.structures.FilaEstatica
+import util.convertArray
 
 class FilaEspera {
     private var participantes: FilaEstatica<Participante> = FilaEstatica()
@@ -19,8 +20,13 @@ class FilaEspera {
         return participantes.frente()
     }
 
-    fun buscarTodosParticipantes(): Array<Participante?> {
-        return participantes.buscarDados()
+    fun buscarTodosParticipantes(): Array<Participante?>? {
+        if (participantes.estaVazia()) {
+            return null
+        }
+        val todosParticipantes = participantes.buscarDados()
+        val participantesArray = convertArray<Participante?>(todosParticipantes)
+        return participantesArray
     }
 
     fun estaCheia(): Boolean {

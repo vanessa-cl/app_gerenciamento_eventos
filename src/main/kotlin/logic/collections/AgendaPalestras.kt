@@ -6,11 +6,19 @@ import util.convertArray
 import java.time.LocalDate
 import java.time.LocalTime
 
+// métodos de inserção e cancelamento retornam booleanos para indicar sucesso ou falha
+// métodos de busca retornam null se não encontrarem o objeto
+
 class AgendaPalestras {
     private var palestras = ListaEstatica<Palestra>(10)
 
     fun inserirPalestra(palestra: Palestra): Boolean {
-        val conflito = verificarConflitoHorarios(palestra.getHorarioInicio(), palestra.getHorarioFim())
+        val conflito = verificarConflito(
+            palestra.getId(),
+            palestra.getHorarioInicio(),
+            palestra.getHorarioFim(),
+            palestra.getLocal()
+        )
         if (conflito) {
             // TODO: erro de conflito de horários
             return false
@@ -21,39 +29,60 @@ class AgendaPalestras {
 
     fun atualizarHorarioPalestra(palestra: Palestra, horarioInicio: LocalTime, horarioFim: LocalTime): Boolean {
         val resultado = buscarPalestraPeloTitulo(palestra.getTitulo())
-        val conflito = verificarConflitoHorarios(horarioInicio, horarioFim)
-        if (conflito) {
-            // TODO: erro de conflito de horários
-            return false
-        }
         if (resultado != null) {
+            val conflito = verificarConflito(palestra.getId(), horarioInicio, horarioFim, resultado.getLocal())
+            if (conflito) {
+                // TODO: erro de conflito de horários
+                // TODO: reorganizar palestras por horário
+                return false
+            }
             resultado.setHorarioInicio(horarioInicio)
             resultado.setHorarioFim(horarioFim)
+            return true
         }
-        return true
+        // TODO: erro de palestra não encontrada
+        return false
     }
 
-    fun verificarConflitoHorarios(horarioInicio: LocalTime, horarioFim: LocalTime): Boolean {
+    private fun verificarConflito(id: Int, horarioInicio: LocalTime, horarioFim: LocalTime, local: String): Boolean {
         for (i in 0 until palestras.selecionarTodos().size) {
             val resultado = palestras.selecionar(i)
-            if (resultado != null && resultado.getHorarioInicio() == horarioInicio && resultado.getHorarioFim() == horarioFim) {
+            if (resultado != null && resultado.getId() != id &&
+                resultado.getHorarioInicio() == horarioInicio &&
+                resultado.getHorarioFim() == horarioFim &&
+                resultado.getLocal() == local
+            ) {
                 return true
             }
         }
         return false
     }
 
-    fun removerPalestraPeloTitulo(titulo: String): Palestra? {
+    fun removerPalestraPeloTitulo(titulo: String): Boolean {
         val resultado = buscarPalestraPeloTitulo(titulo)
         if (resultado != null) {
             palestras.apagar(palestras.buscarPosicao(resultado))
-            return resultado
+            return true
         }
         // TODO: erro de palestra não encontrada
-        return null
+        return false
+    }
+
+    fun removerPalestraPeloId(id: Int): Boolean {
+        val resultado = buscarPalestraPeloId(id)
+        if (resultado != null) {
+            palestras.apagar(palestras.buscarPosicao(resultado))
+            return true
+        }
+        // TODO: erro de palestra não encontrada
+        return false
     }
 
     fun buscarPalestraPeloTitulo(titulo: String): Palestra? {
+        if (estaVazia()) {
+            // TODO: erro de lista vazia
+            return null
+        }
         for (i in 0 until palestras.selecionarTodos().size) {
             val resultado = palestras.selecionar(i)
             if (resultado != null && resultado.getTitulo() == titulo) {
@@ -64,19 +93,35 @@ class AgendaPalestras {
         return null
     }
 
-    fun buscarTodasPalestras(): Array<Palestra?> {
+    fun buscarPalestraPeloId(id: Int): Palestra? {
         if (estaVazia()) {
             // TODO: erro de lista vazia
-            return emptyArray()
+            return null
+        }
+        for (i in 0 until palestras.selecionarTodos().size) {
+            val resultado = palestras.selecionar(i)
+            if (resultado != null && resultado.getId() == id) {
+                return resultado
+            }
+        }
+        // TODO: erro de palestra não encontrada
+        return null
+    }
+
+    fun buscarTodasPalestras(): Array<Palestra?>? {
+        if (estaVazia()) {
+            // TODO: erro de lista vazia
+            return null
         }
         val todasPalestras = palestras.selecionarTodos()
         val palestrasArray = convertArray<Palestra?>(todasPalestras)
         return palestrasArray
     }
 
-    fun buscarTodasPalestrasPorDia(data: LocalDate): Array<Palestra?> {
+    fun buscarTodasPalestrasPorDia(data: LocalDate): Array<Palestra?>? {
         if (estaVazia()) {
             // TODO: erro de lista vazia
+            return null
         }
         val resultado: Array<Palestra?> = arrayOfNulls(palestras.selecionarTodos().size)
         for (i in 0 until palestras.selecionarTodos().size) {
@@ -88,9 +133,10 @@ class AgendaPalestras {
         return resultado
     }
 
-    fun buscarTodasPalestrasPorHorario(horarioInicio: LocalTime, horarioFim: LocalTime): Array<Palestra?> {
+    fun buscarTodasPalestrasPorHorario(horarioInicio: LocalTime, horarioFim: LocalTime): Array<Palestra?>? {
         if (estaVazia()) {
             // TODO: erro de lista vazia
+            return null
         }
         val resultado: Array<Palestra?> = arrayOfNulls(palestras.selecionarTodos().size)
         for (i in 0 until palestras.selecionarTodos().size) {

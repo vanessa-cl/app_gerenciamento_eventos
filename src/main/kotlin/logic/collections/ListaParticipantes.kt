@@ -7,17 +7,21 @@ import util.convertArray
 class ListaParticipantes(private var limiteParticipantes: Int) {
     private var participantes = ListaEstatica<Participante>(limiteParticipantes)
 
-    fun inserirParticipante(participante: Participante) {
+    fun inserirParticipante(participante: Participante): Boolean {
+        if (participantes.estaCheia()) {
+            return false
+        }
         participantes.anexar(participante)
+        return true
     }
 
-    fun removerParticipantePeloNome(nome: String): Participante? {
+    fun removerParticipantePeloNome(nome: String): Boolean {
         val participante = buscarParticipantePeloNome(nome)
         if (participante != null) {
             participantes.apagar(participantes.buscarPosicao(participante))
-            return participante
+            return true
         }
-        return null
+        return false
     }
 
     fun buscarParticipantePeloNome(nome: String): Participante? {
@@ -40,9 +44,9 @@ class ListaParticipantes(private var limiteParticipantes: Int) {
         return null
     }
 
-    fun buscarTodosParticipantes(): Array<Participante?> {
+    fun buscarTodosParticipantes(): Array<Participante?>? {
         if (participantes.estaVazia()) {
-            return emptyArray()
+            return null
         }
         val todosParticipantes = participantes.selecionarTodos()
         val participantesConv = convertArray<Participante?>(todosParticipantes)

@@ -11,13 +11,13 @@ class ListaEventos {
         eventos.anexar(evento)
     }
 
-    fun removerEventoPeloNome(nome: String): Evento? {
+    fun removerEventoPeloNome(nome: String): Boolean {
         val evento = buscarEventoPeloNome(nome)
         if (evento != null) {
             eventos.apagar(eventos.buscarPosicao(evento))
-            return evento
+            return true
         }
-        return null
+        return false
     }
 
     fun buscarEventoPeloNome(nome: String): Evento? {
@@ -40,9 +40,9 @@ class ListaEventos {
         return null
     }
 
-    fun buscarTodosEventos(): Array<Evento?> {
+    fun buscarTodosEventos(): Array<Evento?>? {
         if (eventos.estaVazia()) {
-            return emptyArray()
+            return null
         }
         val todosEventos = eventos.selecionarTodos()
         val todosEventosConv = convertArray<Evento?>(todosEventos)

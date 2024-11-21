@@ -42,29 +42,3 @@ fun main() {
     }
 }
 
-fun menuGerenciarPalestras(eventos: ListaEventos) {
-    println("Digite o nome do evento que deseja gerenciar as palestras:")
-    val nomeEvento = readln()
-    val evento = eventos.buscarEventoPeloNome(nomeEvento)
-    if (evento != null) {
-        val telaGerenciarPalestras = GerenciarPalestras(evento)
-        var voltar = false
-        while (!voltar) {
-            telaGerenciarPalestras.mostrarMenuPalestras()
-            val opcao = readln().toInt()
-            when (opcao) {
-                1 -> telaGerenciarPalestras.cadastrarPalestra()
-                2 -> telaGerenciarPalestras.exibirPalestras()
-                3 -> telaGerenciarPalestras.cancelarPalestra()
-                4 -> telaGerenciarPalestras.atualizarHorarioPalestra()
-                5 -> telaGerenciarPalestras.consultarParticipantes()
-                6 -> telaGerenciarPalestras.consultarListaEspera()
-                7 -> voltar = true
-                else -> println("Opção inválida! Tente novamente")
-            }
-        }
-    } else {
-        println("Evento não encontrado")
-    }
-}
-
