@@ -3,6 +3,7 @@ package ui
 import logic.collections.ListaEventos
 import logic.entities.Evento
 import logic.entities.Participante
+import util.NotificationThread
 import util.PrintTables
 import util.SequentialId
 import java.time.LocalDate
@@ -12,6 +13,7 @@ class MenuEventos() {
     private var id = SequentialId()
     private var menuGerenciarPalestras = GerenciarPalestras()
     private var printTables = PrintTables()
+    lateinit var thread: NotificationThread
 
     fun mostrarMenuColaborador() {
         var voltar = false
@@ -70,6 +72,8 @@ class MenuEventos() {
     }
 
     fun mostrarMenuOuvinte(participante: Participante) {
+        thread = NotificationThread(participante)
+        thread.start()
         var voltar = false
         println("Digite o ID de um dos eventos abaixo para consultar as opções:")
         exibirEventos()
@@ -189,6 +193,7 @@ class MenuEventos() {
         }
         val participanteFilaEspera = palestra.getFilaEspera().removerParticipanteInicio() ?: return
         palestra.getParticipantes().inserirParticipante(participanteFilaEspera)
+        thread.notificarUsuario("Você foi inscrito na palestra ${palestra.getTitulo()}!", participanteFilaEspera)
         return
     }
 }
