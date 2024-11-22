@@ -48,4 +48,5 @@ class ListaEventos {
         val todosEventosConv = convertArray<Evento?>(todosEventos)
         return todosEventosConv
     }
+
 }

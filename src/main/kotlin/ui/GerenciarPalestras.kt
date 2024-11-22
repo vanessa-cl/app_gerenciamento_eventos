@@ -3,6 +3,7 @@ package ui
 import logic.collections.ListaEventos
 import logic.entities.Evento
 import logic.entities.Palestra
+import util.PrintTables
 import util.SequentialId
 import java.time.LocalDate
 import java.time.LocalTime
@@ -10,9 +11,10 @@ import java.time.LocalTime
 class GerenciarPalestras {
     private var id = SequentialId()
     private lateinit var evento: Evento
+    private var printTables = PrintTables()
 
     fun mostrarMenuGerenciarPalestras(todosEventos: ListaEventos) {
-        println("Digite o número identificador do evento que deseja gerenciar as palestras:")
+        println("Digite o ID do evento que deseja gerenciar as palestras:")
         val idEvento = readln().toInt()
         val eventoSelecionado = todosEventos.buscarEventoPeloId(idEvento)
         if (eventoSelecionado != null) {
@@ -68,9 +70,9 @@ class GerenciarPalestras {
         val localPalestra = readln()
         println("Digite o limite de participantes:")
         val limiteParticipantes = readln().toInt()
-        println("Digite o horário de início:")
+        println("Digite o horário de início (HH:MM):")
         val horarioInicio = readln()
-        println("Digite o horário de término:")
+        println("Digite o horário de término (HH:MM):")
         val horarioTermino = readln()
         val novaPalestra = Palestra(
             id.gerarId(),
@@ -96,25 +98,16 @@ class GerenciarPalestras {
             println("Não há palestras cadastradas para este evento")
             return
         }
-        println("_______________________________________________________________________________________________________________________________")
-        println("ID | Título                  | Palestrante     | Local | Data       | Início | Término | Limite Part. | Status ")
-        println("_______________________________________________________________________________________________________________________________")
-        for (palestra in palestras) {
-            if (palestra == null) {
-                continue
-            }
-            println("${palestra.getId()}  | ${palestra.getTitulo()}    | ${palestra.getPalestrante()}     | ${palestra.getLocal()}  | ${palestra.getData()} | ${palestra.getHorarioInicio()}  | ${palestra.getHorarioFim()}   | ${palestra.getLimiteParticipantes()}           | ${palestra.getStatus()}")
-            println("_______________________________________________________________________________________________________________________________")
-        }
-
+        printTables.tablePalestras(palestras)
     }
 
     private fun exibirPalestrasPorHorario() {
         // TODO: implementar ordenação
+        // printTables.tablePalestras()
     }
 
     private fun cancelarPalestra() {
-        println("Digite o número identificador da palestra que deseja cancelar:")
+        println("Digite o ID da palestra que deseja cancelar:")
         val idPalestra = readln().toInt()
         val palestraEncontrada = evento.getAgenda().buscarPalestraPeloId(idPalestra)
         if (palestraEncontrada == null) {
@@ -140,16 +133,17 @@ class GerenciarPalestras {
     }
 
     private fun atualizarHorarioPalestra() {
-        println("Digite o número identificador da palestra que deseja atualizar o horário:")
+        // TODO: tirar dúvida sobre atualização de horário em caso de conflito (impedir ou reorganizar?)
+        println("Digite o ID da palestra que deseja atualizar o horário:")
         val idPalestra = readln().toInt()
         val palestra = evento.getAgenda().buscarPalestraPeloId(idPalestra)
         if (palestra == null) {
             println("Palestra não encontrada!")
             return
         }
-        println("Digite o novo horário de início:")
+        println("Digite o novo horário de início (HH:MM):")
         val horarioInicio = readln()
-        println("Digite o novo horário de término:")
+        println("Digite o novo horário de término (HH:MM):")
         val horarioTermino = readln()
         val sucesso = evento.getAgenda()
             .atualizarHorarioPalestra(palestra, LocalTime.parse(horarioInicio), LocalTime.parse(horarioTermino))
@@ -162,7 +156,7 @@ class GerenciarPalestras {
     }
 
     private fun consultarParticipantes() {
-        println("Digite o número identificador da palestra que deseja consultar os participantes:")
+        println("Digite o ID da palestra que deseja consultar os participantes:")
         val idPalestra = readln().toInt()
         val palestraEncontrada = evento.getAgenda().buscarPalestraPeloId(idPalestra)
         if (palestraEncontrada == null) {
@@ -174,20 +168,11 @@ class GerenciarPalestras {
             println("Não há participantes inscritos nesta palestra")
             return
         }
-        println("_______________________________________________________________________________________________________________________________")
-        println("ID | Nome              | Email                     | CPF             | Cargo ")
-        println("_______________________________________________________________________________________________________________________________")
-        for (participante in participantes) {
-            if (participante == null) {
-                continue
-            }
-            println("${participante.getId()}  | ${participante.getNome()}        | ${participante.getEmail()}    | ${participante.getCpf()}  | ${participante.getCargo()}")
-        }
-
+        printTables.tableParticipantes(participantes)
     }
 
     private fun consultarListaEspera() {
-        println("Digite o número identificador da palestra que deseja consultar a lista de espera:")
+        println("Digite o ID da palestra que deseja consultar a lista de espera:")
         val idPalestra = readln().toInt()
         val palestraEncontrada = evento.getAgenda().buscarPalestraPeloId(idPalestra)
         if (palestraEncontrada == null) {
@@ -199,16 +184,7 @@ class GerenciarPalestras {
             println("Não há participantes na lista de espera!")
             return
         }
-        println("_______________________________________________________________________________________________________________________________")
-        println("ID | Nome              | Email                     | CPF             | Cargo ")
-        println("_______________________________________________________________________________________________________________________________")
-        for (participante in participantesFilaEspera) {
-            if (participante == null) {
-                continue
-            }
-            println("${participante.getId()}  | ${participante.getNome()}        | ${participante.getEmail()}    | ${participante.getCpf()}  | ${participante.getCargo()}")
-        }
-
+        printTables.tableParticipantes(participantesFilaEspera)
     }
 
 }

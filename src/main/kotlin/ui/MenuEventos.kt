@@ -3,6 +3,7 @@ package ui
 import logic.collections.ListaEventos
 import logic.entities.Evento
 import logic.entities.Participante
+import util.PrintTables
 import util.SequentialId
 import java.time.LocalDate
 
@@ -10,6 +11,7 @@ class MenuEventos() {
     private var todosEventos = ListaEventos()
     private var id = SequentialId()
     private var menuGerenciarPalestras = GerenciarPalestras()
+    private var printTables = PrintTables()
 
     fun mostrarMenuColaborador() {
         var voltar = false
@@ -64,24 +66,15 @@ class MenuEventos() {
             println("Não há eventos cadastrados!")
             return
         }
-        println("_______________________________________________________________________________________________________________________________")
-        println("ID | Nome                     | Data de início | Data de término | Descrição                  | Valor da inscrição")
-        println("_______________________________________________________________________________________________________________________________")
-        for (evento in eventos) {
-            if (evento == null) {
-                continue
-            }
-            println("${evento.getId()}  | ${evento.getNome()}    | ${evento.getDataInicio()}     | ${evento.getDataFim()}      | ${evento.getDescricao()} | ${evento.getValorInscricao()}")
-            println("_______________________________________________________________________________________________________________________________")
-        }
+        printTables.tableEventos(eventos)
     }
 
     fun mostrarMenuOuvinte(participante: Participante) {
         var voltar = false
-        println("Digite o nome de um dos eventos abaixo para consultar as opções:")
+        println("Digite o ID de um dos eventos abaixo para consultar as opções:")
         exibirEventos()
-        val nomeEvento = readln()
-        val evento = todosEventos.buscarEventoPeloNome(nomeEvento)
+        val entrada = readln().toInt()
+        val evento = todosEventos.buscarEventoPeloId(entrada)
         if (evento != null) {
             while (!voltar) {
                 println("1 - Consultar agenda")
@@ -90,7 +83,7 @@ class MenuEventos() {
                 val opcao = readln().toInt()
                 when (opcao) {
                     1 -> consultarAgenda(evento, participante)
-                    2 -> minhasInscricoes(evento, participante)
+                    2 -> consultarInscricoes(evento, participante)
                     3 -> voltar = true
                     else -> println("Opção inválida! Tente novamente")
                 }
@@ -105,23 +98,17 @@ class MenuEventos() {
             println("Não há palestras cadastradas para este evento")
             return
         }
-        println("_______________________________________________________________________________________________________________________________")
-        println("ID | Título                  | Palestrante     | Local | Data       | Início | Término | Limite Part. | Status ")
-        println("_______________________________________________________________________________________________________________________________")
-        for (palestra in palestras) {
-            if (palestra == null) {
-                continue
-            }
-            println("${palestra.getId()}  | ${palestra.getTitulo()}    | ${palestra.getPalestrante()}     | ${palestra.getLocal()}      | ${palestra.getData()} | ${palestra.getHorarioInicio()} | ${palestra.getHorarioFim()} | ${palestra.getLimiteParticipantes()} | ${palestra.getStatus()}")
-            println("_______________________________________________________________________________________________________________________________")
-        }
+        printTables.tablePalestras(palestras)
+        inscreverEmPalestra(evento, participante)
+    }
 
-        println("Digite o nome de uma palestra para se inscrever ou X para voltar:")
+    private fun inscreverEmPalestra(evento: Evento, participante: Participante) {
+        println("Digite o ID de uma palestra para se inscrever ou X para voltar:")
         val entrada = readln()
         if (entrada == "X") {
             return
         }
-        val palestra = evento.getAgenda().buscarPalestraPeloTitulo(entrada)
+        val palestra = evento.getAgenda().buscarPalestraPeloId(entrada.toInt())
         if (palestra == null) {
             println("Palestra não encontrada!")
             return
@@ -146,29 +133,24 @@ class MenuEventos() {
         return
     }
 
-    private fun minhasInscricoes(evento: Evento, participante: Participante) {
+    private fun consultarInscricoes(evento: Evento, participante: Participante) {
         println("Minhas inscrições no Evento ${evento.getNome()}:")
         val inscricoes = participante.getPalestrasInscritas().buscarTodasPalestras()
         if (inscricoes == null) {
             println("Você não está inscrito em nenhuma palestra")
             return
         }
-        println("_______________________________________________________________________________________________________________________________")
-        println("ID | Título                  | Palestrante     | Local | Data       | Início | Término | Limite Part. | Status ")
-        println("_______________________________________________________________________________________________________________________________")
-        for (inscricao in inscricoes) {
-            if (inscricao == null) {
-                continue
-            }
-            println("${inscricao.getId()}  | ${inscricao.getTitulo()}    | ${inscricao.getPalestrante()}     | ${inscricao.getLocal()}  | ${inscricao.getData()} | ${inscricao.getHorarioInicio()}  | ${inscricao.getHorarioFim()}   | ${inscricao.getLimiteParticipantes()}           | ${inscricao.getStatus()}")
-            println("_______________________________________________________________________________________________________________________________")
-        }
-        println("Digite o nome de uma palestra para cancelar a inscrição ou X para voltar:")
+        printTables.tablePalestras(inscricoes)
+        cancelarInscricao(evento, participante)
+    }
+
+    private fun cancelarInscricao(evento: Evento, participante: Participante) {
+        println("Digite o ID de uma palestra para cancelar a inscrição ou X para voltar:")
         var entrada = readln()
         if (entrada == "X") {
             return
         }
-        val palestra = evento.getAgenda().buscarPalestraPeloTitulo(entrada)
+        val palestra = evento.getAgenda().buscarPalestraPeloId(entrada.toInt())
         if (palestra == null) {
             println("Palestra não encontrada!")
             return
