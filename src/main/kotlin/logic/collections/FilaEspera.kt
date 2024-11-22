@@ -29,6 +29,18 @@ class FilaEspera {
         return participantesArray
     }
 
+    fun buscarParticipantePeloId(id: Int): Participante? {
+        val resultado = buscarTodosParticipantes()
+        if (resultado != null) {
+            for (participante in resultado) {
+                if (participante?.getId() == id) {
+                    return participante
+                }
+            }
+        }
+        return null
+    }
+
     fun estaCheia(): Boolean {
         return participantes.estaCheia()
     }

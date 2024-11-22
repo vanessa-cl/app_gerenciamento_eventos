@@ -116,20 +116,16 @@ class GerenciarPalestras {
         }
         println("Tem certeza que deseja cancelar a palestra? (S/N)")
         val confirmacao = readln()
-        if (confirmacao == "S") {
-            val sucesso = evento.getAgenda().removerPalestraPeloId(idPalestra)
-            if (!sucesso) {
-                println("Erro ao cancelar palestra!")
-                return
-            }
-            println("Palestra cancelada com sucesso!")
-            return
-        }
         if (confirmacao == "N") {
             return
         }
-
-
+        val sucesso = evento.getAgenda().removerPalestraPeloId(idPalestra)
+        if (!sucesso) {
+            println("Erro ao cancelar palestra!")
+            return
+        }
+        println("Palestra cancelada com sucesso!")
+        return
     }
 
     private fun atualizarHorarioPalestra() {

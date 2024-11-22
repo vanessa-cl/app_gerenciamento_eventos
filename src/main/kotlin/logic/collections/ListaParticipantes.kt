@@ -24,6 +24,15 @@ class ListaParticipantes(private var limiteParticipantes: Int) {
         return false
     }
 
+    fun removerParticipantePeloId(id: Int): Boolean {
+        val participante = buscarParticipantePeloId(id)
+        if (participante != null) {
+            participantes.apagar(participantes.buscarPosicao(participante))
+            return true
+        }
+        return false
+    }
+
     fun buscarParticipantePeloNome(nome: String): Participante? {
         for (i in 0 until participantes.selecionarTodos().size) {
             val participante = participantes.selecionar(i)

@@ -77,6 +77,7 @@ class MenuEventos() {
         val evento = todosEventos.buscarEventoPeloId(entrada)
         if (evento != null) {
             while (!voltar) {
+                println("Menu do Evento ${evento.getNome()}")
                 println("1 - Consultar agenda")
                 println("2 - Minhas inscrições")
                 println("3 - Voltar")
@@ -113,10 +114,20 @@ class MenuEventos() {
             println("Palestra não encontrada!")
             return
         }
+        val jaEstaInscritoPalestra = palestra.getParticipantes().buscarParticipantePeloId(participante.getId())
+        if (jaEstaInscritoPalestra != null) {
+            println("Você já está inscrito nesta palestra!")
+            return
+        }
         if (palestra.getParticipantes().estaCheia()) {
             println("A palestra ${palestra.getTitulo()} atingiu o limite de participantes. Deseja entrar na lista de espera? (S/N)")
             val opcao = readln()
             if (opcao == "S") {
+                val jaEstaNaFilaEspera = palestra.getFilaEspera().buscarParticipantePeloId(participante.getId())
+                if (jaEstaNaFilaEspera != null) {
+                    println("Você já está na lista de espera desta palestra!")
+                    return
+                }
                 palestra.getFilaEspera().inserirParticipanteFim(participante)
                 println("Inscrição na lista de espera realizada com sucesso!")
                 return
@@ -155,14 +166,19 @@ class MenuEventos() {
             println("Palestra não encontrada!")
             return
         }
+        val naoEstaInscrito = palestra.getParticipantes().buscarParticipantePeloId(participante.getId())
+        if (naoEstaInscrito == null) {
+            println("Você não está inscrito nesta palestra!")
+            return
+        }
         println("Tem certeza que deseja cancelar a inscrição na palestra ${palestra.getTitulo()}? (S/N)")
         entrada = readln()
         if (entrada == "N") {
             return
         }
-        val sucessoPalestra = palestra.getParticipantes().removerParticipantePeloNome(participante.getNome())
+        val sucessoPalestra = palestra.getParticipantes().removerParticipantePeloId(participante.getId())
         val sucessoParticipante =
-            participante.getPalestrasInscritas().removerPalestraPeloTitulo(palestra.getTitulo())
+            participante.getPalestrasInscritas().removerPalestraPeloId(palestra.getId())
         if (!sucessoPalestra && !sucessoParticipante) {
             println("Erro ao cancelar inscrição!")
             return
