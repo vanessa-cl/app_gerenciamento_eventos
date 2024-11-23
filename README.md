@@ -18,12 +18,22 @@ Este é um projeto de aplicativo de desktop para gerenciamento de eventos, desen
  - Selecione a pasta app_gerenciamento_eventos e clique em OK.
  - No IntelliJ IDEA, vá até a janela Maven (geralmente localizada na barra lateral direita).
  Clique no botão Reload All Maven Projects para garantir que todas as dependências sejam baixadas e configuradas corretamente.
+![img.png](src/main/resources/img.png)
  - Navegue até o arquivo src/main/kotlin/ui/MainApp.kt.
  - Clique com o botão direito no arquivo e selecione Run 'MainApp'.
  - Uma janela do JavaFX deve abrir com o título "App de Gerenciamento de Eventos" e um botão "Clique aqui".
  
 ### Problemas Comuns
  - **Dependências do Maven:** Se houver problemas com dependências, tente executar `mvn clean install` no terminal dentro do diretório do projeto.
+ - **Output Path:** Se houver problemas com o output path como apontado pelo Intellij na imagem abaixo, clique em _Configure_ e siga os passos abaixo para configurar o output path.
+   ![img.png](src/main/resources/img_1.png)
+   - Ao clicar em _Configure_, clique em _Add Output Path_, em seguida o modal abaixo será exibido.
+   ![img.png](src/main/resources/img_3.png)
+   - No campo _Output Path_, clique em no ícone de pasta e selecione _app_gerenciamento_eventos/target/classes_.
+   - Clique em _OK_ e em seguida em _Apply_ e _OK_.
+   - Faça o Reload All Maven Projects novamente.
+   - Execute o arquivo MainApp.kt novamente.
+   - Se o problema persistir, tente reiniciar o IntelliJ IDEA.
 
 ## Estrutura de Pastas do Projeto
 A organização das pastas abaixo foi adotada para manter o código limpo, modular e simplificar o desenvolvimento e a manutenção do projeto.
