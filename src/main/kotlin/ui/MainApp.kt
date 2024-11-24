@@ -10,22 +10,30 @@ import javafx.scene.control.Button
 import javafx.scene.control.TitledPane
 import javafx.scene.layout.VBox
 import javafx.stage.Stage
+import logic.collections.ListaEventos
+
+val usuarioTesteColaborador = Participante(1, "João", "joao123@email.com", "123456", CargoEnum.COLABORADOR)
 
 class MainApp : Application() {
     private lateinit var initialScene: Scene
+    private val todosEventos = ListaEventos()
 
     override fun start(primaryStage: Stage) {
-        val telaMenuEventos = TelaMenuEventos(primaryStage, this)
-        val btnEntrar = Button("Entrar")
-        btnEntrar.setOnAction {
-            telaMenuEventos.menuColaboradorScene()
+        val telaGerenciarEventos = TelaGerenciarEventos(primaryStage, this, todosEventos, usuarioTesteColaborador)
+        val btnEntrarColab = Button("Entrar como colaborador")
+        btnEntrarColab.setOnAction {
+            primaryStage.scene = telaGerenciarEventos.gerenciarEventosScene()
+        }
+        val btnEntrarOuvinte = Button("Entrar como ouvinte")
+        btnEntrarOuvinte.setOnAction {
+//            telaMenuEventos.menuOuvinteScene()
         }
         val btnEncerrar = Button("Encerrar")
         btnEncerrar.setOnAction {
             primaryStage.close()
         }
 
-        val vbox = VBox(10.0, btnEntrar, btnEncerrar)
+        val vbox = VBox(10.0, btnEntrarColab, btnEncerrar)
         val titledPane = TitledPane("App de Gerenciamento de Eventos", vbox)
 
         initialScene = Scene(titledPane, 1000.0, 600.0)
