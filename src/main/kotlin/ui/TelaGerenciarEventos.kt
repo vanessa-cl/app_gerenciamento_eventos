@@ -1,5 +1,6 @@
 package ui
 
+import javafx.beans.property.SimpleStringProperty
 import javafx.collections.FXCollections
 import logic.entities.Participante
 import javafx.scene.Scene
@@ -21,6 +22,9 @@ class TelaGerenciarEventos(
 ) {
     private var id = SequentialId()
     private var vbox = VBox(10.0)
+    private val resultadoText = SimpleStringProperty()
+    private var resultadoLabel = Label()
+    private lateinit var telaGerenciarPalestras: TelaGerenciarPalestras
 
     fun gerenciarEventosScene(): Scene {
         val pageLabel = Label("Gerenciamento de Eventos")
@@ -51,6 +55,8 @@ class TelaGerenciarEventos(
     }
 
     private fun cadastrarEventoScene(): Scene {
+        resultadoLabel.textProperty().bind(resultadoText)
+        resultadoText.set("")
         val labelNome = Label("Nome do evento:")
         val inputNome = TextField()
         val labelDataInicio = Label("Data de início:")
@@ -69,7 +75,6 @@ class TelaGerenciarEventos(
             val inputDataTerminoContent = inputDataTermino.value
             val inputDescricaoContent = inputDescricao.text
             val inputValorInscricaoContent = inputValorInscricao.text
-
             val novoEvento =
                 Evento(
                     id.gerarId(),
@@ -79,9 +84,8 @@ class TelaGerenciarEventos(
                     inputDataInicioContent,
                     inputDataTerminoContent
                 )
-            println(novoEvento.getNome())
             eventos.inserirEvento(novoEvento)
-            println("Evento cadastrado com sucesso!")
+            resultadoText.set("Evento cadastrado com sucesso!")
         }
 
         val btnVoltar = Button("Voltar")
@@ -99,6 +103,7 @@ class TelaGerenciarEventos(
             inputDescricao,
             labelValorInscricao,
             inputValorInscricao,
+            resultadoLabel,
             btnConfirmar,
             btnVoltar
         )
@@ -109,13 +114,13 @@ class TelaGerenciarEventos(
     }
 
     private fun exibirEventosBox(): VBox {
-        var resultado: Label
         val vbox = VBox(10.0)
+        resultadoLabel.textProperty().bind(resultadoText)
         val eventos = eventos.buscarTodosEventos()
         if (eventos == null) {
-            resultado = Label("Não há eventos cadastrados!")
+            resultadoText.set("Não há eventos cadastrados!")
             vbox.children.addAll(
-                resultado
+                resultadoLabel
             )
             return vbox
         }
@@ -152,12 +157,13 @@ class TelaGerenciarEventos(
         val actionColumn = TableColumn<Evento, Void>("Ações")
         actionColumn.setCellFactory {
             object : TableCell<Evento, Void>() {
-                private val btn = Button("Gerenciar palestras")
+                private val btn = Button("Gerenciar")
 
                 init {
                     btn.setOnAction {
                         val evento = tableView.items[index]
-                        println("Evento selecionado: ${evento.getNome()}")
+                        telaGerenciarPalestras = TelaGerenciarPalestras(primaryStage, evento, this@TelaGerenciarEventos)
+                        primaryStage.scene = telaGerenciarPalestras.gerenciarPalestrasScene()
                     }
                 }
 
@@ -186,4 +192,5 @@ class TelaGerenciarEventos(
         tableView.items = data
         return tableView
     }
+
 }
