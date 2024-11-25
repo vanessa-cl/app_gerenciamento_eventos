@@ -157,7 +157,7 @@ class TelaGerenciarEventos(
         val actionColumn = TableColumn<Evento, Void>("Ações")
         actionColumn.setCellFactory {
             object : TableCell<Evento, Void>() {
-                private val btn = Button("Gerenciar")
+                private val btn = Button("Palestras")
 
                 init {
                     btn.setOnAction {

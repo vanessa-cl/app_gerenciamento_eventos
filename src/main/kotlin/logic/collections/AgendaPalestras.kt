@@ -14,10 +14,11 @@ class AgendaPalestras {
 
     fun inserirPalestra(palestra: Palestra): Boolean {
         val conflito = verificarConflito(
-            palestra.getId(),
-            palestra.getHorarioInicio(),
-            palestra.getHorarioFim(),
-            palestra.getLocal()
+            palestra.id,
+            palestra.horarioInicio,
+            palestra.horarioFim,
+            palestra.local,
+            palestra.data
         )
         if (conflito) {
             // TODO: erro de conflito de horários
@@ -28,29 +29,30 @@ class AgendaPalestras {
     }
 
     fun atualizarHorarioPalestra(palestra: Palestra, horarioInicio: LocalTime, horarioFim: LocalTime): Boolean {
-        val resultado = buscarPalestraPeloTitulo(palestra.getTitulo())
+        val resultado = buscarPalestraPeloTitulo(palestra.titulo)
         if (resultado != null) {
-            val conflito = verificarConflito(palestra.getId(), horarioInicio, horarioFim, resultado.getLocal())
+            val conflito = verificarConflito(palestra.id, horarioInicio, horarioFim, resultado.local, resultado.data)
             if (conflito) {
                 // TODO: erro de conflito de horários
                 // TODO: reorganizar palestras por horário
                 return false
             }
-            resultado.setHorarioInicio(horarioInicio)
-            resultado.setHorarioFim(horarioFim)
+            resultado.horarioInicio = horarioInicio
+            resultado.horarioFim = horarioFim
             return true
         }
         // TODO: erro de palestra não encontrada
         return false
     }
 
-    private fun verificarConflito(id: Int, horarioInicio: LocalTime, horarioFim: LocalTime, local: String): Boolean {
+    private fun verificarConflito(id: Int, horarioInicio: LocalTime, horarioFim: LocalTime, local: String, data: LocalDate): Boolean {
         for (i in 0 until palestras.selecionarTodos().size) {
             val resultado = palestras.selecionar(i)
-            if (resultado != null && resultado.getId() != id &&
-                resultado.getHorarioInicio() == horarioInicio &&
-                resultado.getHorarioFim() == horarioFim &&
-                resultado.getLocal() == local
+            if (resultado != null && resultado.id != id &&
+                resultado.horarioInicio == horarioInicio &&
+                resultado.horarioFim == horarioFim &&
+                resultado.local == local &&
+                resultado.data == data
             ) {
                 return true
             }
@@ -85,7 +87,7 @@ class AgendaPalestras {
         }
         for (i in 0 until palestras.selecionarTodos().size) {
             val resultado = palestras.selecionar(i)
-            if (resultado != null && resultado.getTitulo() == titulo) {
+            if (resultado != null && resultado.titulo == titulo) {
                 return resultado
             }
         }
@@ -100,7 +102,7 @@ class AgendaPalestras {
         }
         for (i in 0 until palestras.selecionarTodos().size) {
             val resultado = palestras.selecionar(i)
-            if (resultado != null && resultado.getId() == id) {
+            if (resultado != null && resultado.id == id) {
                 return resultado
             }
         }
@@ -126,7 +128,7 @@ class AgendaPalestras {
         val resultado: Array<Palestra?> = arrayOfNulls(palestras.selecionarTodos().size)
         for (i in 0 until palestras.selecionarTodos().size) {
             val palestra = palestras.selecionar(i)
-            if (palestra != null && palestra.getData() == data) {
+            if (palestra != null && palestra.data == data) {
                 resultado[i] = palestra
             }
         }
@@ -141,7 +143,7 @@ class AgendaPalestras {
         val resultado: Array<Palestra?> = arrayOfNulls(palestras.selecionarTodos().size)
         for (i in 0 until palestras.selecionarTodos().size) {
             val palestra = palestras.selecionar(i)
-            if (palestra != null && palestra.getHorarioInicio() == horarioInicio && palestra.getHorarioFim() == horarioFim) {
+            if (palestra != null && palestra.horarioInicio == horarioInicio && palestra.horarioFim == horarioFim) {
                 resultado[i] = palestra
             }
         }

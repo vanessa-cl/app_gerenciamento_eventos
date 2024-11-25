@@ -24,7 +24,7 @@ class TelaGerenciarPalestras(
 
 
     fun gerenciarPalestrasScene(): Scene {
-        val pageLabel = Label("Gerenciamento de Palestras do Evento ${evento.getNome()}")
+        val pageLabel = Label("Gerenciamento de Palestras do Evento ${evento.nome}")
         val vboxPalestras = exibirPalestrasBox()
         val btnCadastro = Button("Cadastrar nova palestra")
         btnCadastro.setOnAction {
@@ -90,7 +90,7 @@ class TelaGerenciarPalestras(
                     LocalTime.parse(inputHoraInicioContent),
                     LocalTime.parse(inputHoraTerminoContent)
                 )
-            val sucesso = evento.getAgenda().inserirPalestra(novaPalestra)
+            val sucesso = evento.agenda.inserirPalestra(novaPalestra)
             if (!sucesso) {
                 resultadoText.set("Erro ao cadastrar palestra! Conflito de horários")
             } else {
@@ -130,7 +130,7 @@ class TelaGerenciarPalestras(
     fun exibirPalestrasBox(): VBox {
         val vbox = VBox(10.0)
         resultadoLabel.textProperty().bind(resultadoText)
-        val palestras = evento.getAgenda().buscarTodasPalestras()
+        val palestras = evento.agenda.buscarTodasPalestras()
         if (palestras == null) {
             resultadoText.set("Não há palestras cadastradas para este evento")
             vbox.children.addAll(

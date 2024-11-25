@@ -33,7 +33,7 @@ class FilaEspera {
         val resultado = buscarTodosParticipantes()
         if (resultado != null) {
             for (participante in resultado) {
-                if (participante?.getId() == id) {
+                if (participante?.id == id) {
                     return participante
                 }
             }

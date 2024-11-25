@@ -36,7 +36,7 @@ class ListaParticipantes(private var limiteParticipantes: Int) {
     fun buscarParticipantePeloNome(nome: String): Participante? {
         for (i in 0 until participantes.selecionarTodos().size) {
             val participante = participantes.selecionar(i)
-            if (participante != null && participante.getNome() == nome) {
+            if (participante != null && participante.nome == nome) {
                 return participante
             }
         }
@@ -46,7 +46,7 @@ class ListaParticipantes(private var limiteParticipantes: Int) {
     fun buscarParticipantePeloId(id: Int): Participante? {
         for (i in 0 until participantes.selecionarTodos().size) {
             val participante = participantes.selecionar(i)
-            if (participante != null && participante.getId() == id) {
+            if (participante != null && participante.id == id) {
                 return participante
             }
         }

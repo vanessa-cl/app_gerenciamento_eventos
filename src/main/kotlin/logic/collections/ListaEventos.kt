@@ -23,7 +23,7 @@ class ListaEventos {
     fun buscarEventoPeloNome(nome: String): Evento? {
         for (i in 0 until eventos.selecionarTodos().size) {
             val evento = eventos.selecionar(i)
-            if (evento != null && evento.getNome() == nome) {
+            if (evento != null && evento.nome == nome) {
                 return evento
             }
         }
@@ -33,7 +33,7 @@ class ListaEventos {
     fun buscarEventoPeloId(id: Int): Evento? {
         for (i in 0 until eventos.selecionarTodos().size) {
             val evento = eventos.selecionar(i)
-            if (evento != null && evento.getId() == id) {
+            if (evento != null && evento.id == id) {
                 return evento
             }
         }
