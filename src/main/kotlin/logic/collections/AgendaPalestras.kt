@@ -150,9 +150,20 @@ class AgendaPalestras {
         return resultado
     }
 
-    fun ordenarPalestrasPorHorario() {
-        // TODO: implementar ordenação
-    }
+    fun ordenarPalestrasPorHorario(): Array<Palestra>? {
+        val todasPalestras = buscarTodasPalestras()
+        if (todasPalestras == null) {
+            // TODO: erro de lista vazia
+            return emptyArray()
+        }
+        val palestrasOrdenadas =
+            todasPalestras.filterNotNull().sortedWith(compareBy({ it!!.data }, { it!!.horarioInicio }))
+
+        for (palestra in palestrasOrdenadas) {
+            println(palestra)
+        }
+        return palestrasOrdenadas as Array<Palestra>
+        }
 
     fun estaVazia(): Boolean {
         return palestras.estaVazia()
