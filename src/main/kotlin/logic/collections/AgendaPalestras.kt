@@ -45,7 +45,13 @@ class AgendaPalestras {
         return false
     }
 
-    private fun verificarConflito(id: Int, horarioInicio: LocalTime, horarioFim: LocalTime, local: String, data: LocalDate): Boolean {
+    private fun verificarConflito(
+        id: Int,
+        horarioInicio: LocalTime,
+        horarioFim: LocalTime,
+        local: String,
+        data: LocalDate
+    ): Boolean {
         for (i in 0 until palestras.selecionarTodos().size) {
             val resultado = palestras.selecionar(i)
             if (resultado != null && resultado.id != id &&

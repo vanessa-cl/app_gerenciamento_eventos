@@ -5,7 +5,9 @@ import javafx.scene.Scene
 import javafx.scene.control.*
 import javafx.scene.control.cell.PropertyValueFactory
 import javafx.beans.property.SimpleStringProperty
+import javafx.scene.layout.HBox
 import javafx.scene.layout.VBox
+import javafx.stage.Modality
 import javafx.stage.Stage
 import logic.entities.Evento
 import logic.entities.Palestra
@@ -143,7 +145,6 @@ class TelaGerenciarPalestras(
         vbox.children.addAll(
             table
         )
-
         return vbox
     }
 
@@ -182,7 +183,7 @@ class TelaGerenciarPalestras(
                 init {
                     btn.setOnAction {
                         val palestra = tableView.items[index]
-                        // TODO: implementar modal de cancelamento de palestra
+                        cancelarPalestraModal(palestra)
                     }
                 }
 
@@ -214,4 +215,48 @@ class TelaGerenciarPalestras(
         return tableView
 
     }
+
+    fun cancelarPalestraModal(palestra: Palestra) {
+        val modalStage = Stage()
+        modalStage.initModality(Modality.APPLICATION_MODAL)
+        modalStage.title = "Tem certeza de que deseja cancelar a palestra?"
+
+        val alerta = Label("Esta ação não poderá ser revertida.")
+        val btnConfirmar = Button("Confirmar")
+        val btnVoltar = Button("Voltar")
+
+        btnConfirmar.setOnAction {
+            val sucesso = evento.agenda.removerPalestraPeloId(palestra.id)
+            if (!sucesso) {
+                println("Erro ao cancelar palestra!")
+            }
+            modalStage.close()
+        }
+
+        btnVoltar.setOnAction {
+            modalStage.close()
+        }
+
+        val hbox = HBox(10.0, btnConfirmar, btnVoltar)
+        val vbox = VBox(10.0, alerta, hbox)
+        val modalScene = Scene(vbox, 400.0, 150.0)
+
+        modalStage.scene = modalScene
+        modalStage.showAndWait()
+    }
+
+//    fun atualizarHorarioPalestraModal(palestra: Palestra) {
+//        println("Digite o novo horário de início (HH:MM):")
+//        val horarioInicio = readln()
+//        println("Digite o novo horário de término (HH:MM):")
+//        val horarioTermino = readln()
+//        val sucesso = evento.agenda()
+//            .atualizarHorarioPalestra(palestra, LocalTime.parse(horarioInicio), LocalTime.parse(horarioTermino))
+//        if (!sucesso) {
+//            println("Erro ao atualizar horário da palestra! Conflito de horários")
+//            return
+//        }
+//        println("Horário da palestra atualizado com sucesso!")
+//        return
+//    }
 }
