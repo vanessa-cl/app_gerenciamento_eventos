@@ -24,7 +24,6 @@ class TelaGerenciarPalestras(
     private val resultadoText = SimpleStringProperty()
     private var resultadoLabel = Label()
 
-
     fun gerenciarPalestrasScene(): Scene {
         val pageLabel = Label("Gerenciamento de Palestras do Evento ${evento.nome}")
         val vboxPalestras = exibirPalestrasBox()
@@ -130,6 +129,8 @@ class TelaGerenciarPalestras(
     }
 
     fun exibirPalestrasBox(): VBox {
+        // TODO: adicionar filtro por data/horário
+        // TODO: adicionar botão para atualizar horário da palestra
         val vbox = VBox(10.0)
         resultadoLabel.textProperty().bind(resultadoText)
         val palestras = evento.agenda.buscarTodasPalestras()

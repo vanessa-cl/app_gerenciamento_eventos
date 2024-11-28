@@ -10,8 +10,7 @@ import javafx.scene.layout.VBox
 import javafx.stage.Stage
 import logic.collections.ListaEventos
 import logic.entities.Evento
-import util.NotificationThread
-import util.SequentialId
+import util.*
 import java.time.LocalDate
 
 class TelaGerenciarEventos(
@@ -25,6 +24,7 @@ class TelaGerenciarEventos(
     private val resultadoText = SimpleStringProperty()
     private var resultadoLabel = Label()
     private lateinit var telaGerenciarPalestras: TelaGerenciarPalestras
+    private val fileUtil = FileUtil()
 
     fun gerenciarEventosScene(): Scene {
         val pageLabel = Label("Gerenciamento de Eventos")
@@ -67,6 +67,9 @@ class TelaGerenciarEventos(
         val inputDescricao = TextField()
         val labelValorInscricao = Label("Valor da inscrição (Ex: R$0.00):")
         val inputValorInscricao = TextField()
+        val labelTurno = Label("Turno:")
+        val comboBoxTurno = ComboBox<TurnoEnum>()
+        comboBoxTurno.items.addAll(TurnoEnum.entries)
 
         val btnConfirmar = Button("Cadastrar")
         btnConfirmar.setOnAction {
@@ -75,6 +78,7 @@ class TelaGerenciarEventos(
             val inputDataTerminoContent = inputDataTermino.value
             val inputDescricaoContent = inputDescricao.text
             val inputValorInscricaoContent = inputValorInscricao.text
+            val comboBoxTurnoContent = comboBoxTurno.selectionModel.selectedItem
             val novoEvento =
                 Evento(
                     id.gerarId(),
@@ -82,10 +86,16 @@ class TelaGerenciarEventos(
                     inputDescricaoContent,
                     inputValorInscricaoContent.toDouble(),
                     inputDataInicioContent,
-                    inputDataTerminoContent
+                    inputDataTerminoContent,
+                    StatusEnum.PENDENTE,
+                    comboBoxTurnoContent
                 )
             eventos.inserirEvento(novoEvento)
             resultadoText.set("Evento cadastrado com sucesso!")
+            fileUtil.anexarArquivoTxt(
+                "src/main/resources/db/eventos.txt",
+                novoEvento.toString()
+            )
         }
 
         val btnVoltar = Button("Voltar")
@@ -99,6 +109,8 @@ class TelaGerenciarEventos(
             inputDataInicio,
             labelDataTermino,
             inputDataTermino,
+            labelTurno,
+            comboBoxTurno,
             labelDescricao,
             inputDescricao,
             labelValorInscricao,
@@ -148,11 +160,17 @@ class TelaGerenciarEventos(
         val dataTerminoColumn = TableColumn<Evento, LocalDate>("Data de Término")
         dataTerminoColumn.cellValueFactory = PropertyValueFactory("dataFim")
 
+        val turnoColumn = TableColumn<Evento, TurnoEnum>("Turno")
+        turnoColumn.cellValueFactory = PropertyValueFactory("turno")
+
         val descricaoColumn = TableColumn<Evento, String>("Descrição")
         descricaoColumn.cellValueFactory = PropertyValueFactory("descricao")
 
         val valorInscricaoColumn = TableColumn<Evento, Double>("Valor da Inscrição")
         valorInscricaoColumn.cellValueFactory = PropertyValueFactory("valorInscricao")
+
+        val statusColumn = TableColumn<Evento, StatusEnum>("Status")
+        statusColumn.cellValueFactory = PropertyValueFactory("status")
 
         val actionColumn = TableColumn<Evento, Void>("Ações")
         actionColumn.setCellFactory {
@@ -183,8 +201,10 @@ class TelaGerenciarEventos(
             nomeColumn,
             dataInicioColumn,
             dataTerminoColumn,
+            turnoColumn,
             descricaoColumn,
             valorInscricaoColumn,
+            statusColumn,
             actionColumn
         )
 

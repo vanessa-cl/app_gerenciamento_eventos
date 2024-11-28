@@ -1,8 +1,12 @@
 package ui
 
+import logic.collections.ListaEventos
+import logic.entities.Evento
 import logic.entities.Participante
 import util.CargoEnum
-
+import util.FileUtil
+import util.StatusEnum
+import util.TurnoEnum
 import javafx.application.Application
 import javafx.application.Application.launch
 import javafx.scene.Scene
@@ -10,15 +14,35 @@ import javafx.scene.control.Button
 import javafx.scene.control.TitledPane
 import javafx.scene.layout.VBox
 import javafx.stage.Stage
-import logic.collections.ListaEventos
+import java.time.LocalDate
 
 val usuarioTesteColaborador = Participante(1, "João", "joao123@email.com", "123456", CargoEnum.COLABORADOR)
 
 class MainApp : Application() {
     private lateinit var initialScene: Scene
     private val todosEventos = ListaEventos()
+    private val FileUtil = FileUtil()
+
+    private fun loadEventos() {
+        val eventos = FileUtil.lerArquivoTxt("src/main/resources/db/eventos.txt")
+        for (evento in eventos) {
+            val dados = evento.split(",")
+            val novoEvento = Evento(
+                dados[0].toInt(),
+                dados[1],
+                dados[2],
+                dados[3].toDouble(),
+                LocalDate.parse(dados[4]),
+                LocalDate.parse(dados[5]),
+                StatusEnum.valueOf(dados[6]),
+                TurnoEnum.valueOf(dados[7])
+            )
+            todosEventos.inserirEvento(novoEvento)
+        }
+    }
 
     override fun start(primaryStage: Stage) {
+        loadEventos()
         val telaGerenciarEventos = TelaGerenciarEventos(primaryStage, this, todosEventos, usuarioTesteColaborador)
         val btnEntrarColab = Button("Entrar como colaborador")
         btnEntrarColab.setOnAction {
