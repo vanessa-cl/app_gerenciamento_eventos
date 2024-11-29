@@ -19,7 +19,7 @@ class TelaGerenciarPalestras(
     private val evento: Evento,
     private val telaGerenciarEventos: TelaGerenciarEventos
 ) {
-    private var id = SequentialId()
+    private var id = SequentialId(1)
     private var vbox = VBox(10.0)
     private val resultadoText = SimpleStringProperty()
     private var resultadoLabel = Label()

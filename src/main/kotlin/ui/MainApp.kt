@@ -21,29 +21,10 @@ val usuarioTesteColaborador = Participante(1, "João", "joao123@email.com", "123
 class MainApp : Application() {
     private lateinit var initialScene: Scene
     private val todosEventos = ListaEventos()
-    private val FileUtil = FileUtil()
-
-    private fun loadEventos() {
-        val eventos = FileUtil.lerArquivoTxt("src/main/resources/db/eventos.txt")
-        for (evento in eventos) {
-            val dados = evento.split(",")
-            val novoEvento = Evento(
-                dados[0].toInt(),
-                dados[1],
-                dados[2],
-                dados[3].toDouble(),
-                LocalDate.parse(dados[4]),
-                LocalDate.parse(dados[5]),
-                StatusEnum.valueOf(dados[6]),
-                TurnoEnum.valueOf(dados[7])
-            )
-            todosEventos.inserirEvento(novoEvento)
-        }
-    }
 
     override fun start(primaryStage: Stage) {
-        loadEventos()
         val telaGerenciarEventos = TelaGerenciarEventos(primaryStage, this, todosEventos, usuarioTesteColaborador)
+        telaGerenciarEventos.carregarEventosDB()
         val btnEntrarColab = Button("Entrar como colaborador")
         btnEntrarColab.setOnAction {
             primaryStage.scene = telaGerenciarEventos.gerenciarEventosScene()

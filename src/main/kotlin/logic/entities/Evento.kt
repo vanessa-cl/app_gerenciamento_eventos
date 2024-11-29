@@ -18,6 +18,6 @@ data class Evento(
     val agenda = AgendaPalestras()
 
     override fun toString(): String {
-        return "$id,$nome,$descricao,$valorInscricao,$dataInicio,$dataFim,$status"
+        return "$id,$nome,$descricao,$valorInscricao,$dataInicio,$dataFim,$status,$turno"
     }
 }

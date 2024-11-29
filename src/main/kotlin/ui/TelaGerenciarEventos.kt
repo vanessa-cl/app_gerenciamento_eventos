@@ -21,12 +21,31 @@ class TelaGerenciarEventos(
     private val eventos: ListaEventos,
     val usuarioLogado: Participante
 ) {
-    private var id = SequentialId()
+    private lateinit var id: SequentialId
     private var vbox = VBox(10.0)
     private val resultadoText = SimpleStringProperty()
     private var resultadoLabel = Label()
     private lateinit var telaGerenciarPalestras: TelaGerenciarPalestras
     private val fileUtil = FileUtil()
+
+    fun carregarEventosDB() {
+        val eventosDB = fileUtil.lerArquivoTxt("src/main/resources/db/eventos.txt")
+        id = SequentialId(eventosDB.size)
+        for (evento in eventosDB) {
+            val dados = evento.split(",")
+            val novoEvento = Evento(
+                dados[0].toInt(),
+                dados[1],
+                dados[2],
+                dados[3].toDouble(),
+                LocalDate.parse(dados[4]),
+                LocalDate.parse(dados[5]),
+                StatusEnum.valueOf(dados[6]),
+                TurnoEnum.valueOf(dados[7])
+            )
+            eventos.inserirEvento(novoEvento)
+        }
+    }
 
     fun gerenciarEventosScene(): Scene {
         val pageLabel = Label("Gerenciamento de Eventos")
