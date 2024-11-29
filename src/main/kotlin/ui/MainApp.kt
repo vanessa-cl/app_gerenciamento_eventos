@@ -3,10 +3,10 @@ package ui
 import logic.collections.ListaEventos
 import logic.entities.Evento
 import logic.entities.Participante
-import util.CargoEnum
+import util.enums.CargoEnum
 import util.FileUtil
-import util.StatusEnum
-import util.TurnoEnum
+import util.enums.StatusEnum
+import util.enums.TurnoEnum
 import javafx.application.Application
 import javafx.application.Application.launch
 import javafx.scene.Scene

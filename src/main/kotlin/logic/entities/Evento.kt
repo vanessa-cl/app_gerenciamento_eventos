@@ -1,8 +1,8 @@
 package logic.entities
 
 import logic.collections.AgendaPalestras
-import util.StatusEnum
-import util.TurnoEnum
+import util.enums.StatusEnum
+import util.enums.TurnoEnum
 import java.time.LocalDate
 
 data class Evento(

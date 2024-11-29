@@ -10,7 +10,9 @@ import javafx.scene.layout.VBox
 import javafx.stage.Stage
 import logic.collections.ListaEventos
 import logic.entities.Evento
-import util.*
+import util.enums.*
+import util.FileUtil
+import util.SequentialId
 import java.time.LocalDate
 
 class TelaGerenciarEventos(
