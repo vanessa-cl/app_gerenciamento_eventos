@@ -1,7 +1,7 @@
 package logic.entities
 
 import logic.collections.AgendaPalestras
-import util.CargoEnum
+import util.enums.CargoEnum
 
 data class Participante(
     val id: Int,

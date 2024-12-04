@@ -1,7 +1,6 @@
 package util
 
-class SequentialId {
-    private var currentId = 0
+class SequentialId(private var currentId: Int) {
 
     fun gerarId(): Int {
         return ++currentId

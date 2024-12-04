@@ -34,7 +34,6 @@ class AgendaPalestras {
             val conflito = verificarConflito(palestra.id, horarioInicio, horarioFim, resultado.local, resultado.data)
             if (conflito) {
                 // TODO: erro de conflito de horários
-                // TODO: reorganizar palestras por horário
                 return false
             }
             resultado.horarioInicio = horarioInicio

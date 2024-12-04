@@ -1,7 +1,8 @@
 package logic.entities
 
 import logic.collections.AgendaPalestras
-import util.StatusEnum
+import util.enums.StatusEnum
+import util.enums.TurnoEnum
 import java.time.LocalDate
 
 data class Evento(
@@ -11,7 +12,12 @@ data class Evento(
     val valorInscricao: Double,
     val dataInicio: LocalDate,
     val dataFim: LocalDate,
+    val status: StatusEnum = StatusEnum.PENDENTE,
+    val turno: TurnoEnum
 ) {
-    var status = StatusEnum.PENDENTE
     val agenda = AgendaPalestras()
+
+    override fun toString(): String {
+        return "$id,$nome,$descricao,$valorInscricao,$dataInicio,$dataFim,$status,$turno"
+    }
 }
