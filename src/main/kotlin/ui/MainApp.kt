@@ -37,6 +37,7 @@ class MainApp : Application() {
         val titledPane = TitledPane("App de Gerenciamento de Eventos", vbox)
 
         initialScene = Scene(titledPane, 1000.0, 600.0)
+        //initialScene.stylesheets.add(javaClass.getResource("src/main/resources/Style.css").toExternalForm())
         primaryStage.title = "HomePage"
         primaryStage.scene = initialScene
         primaryStage.show()
