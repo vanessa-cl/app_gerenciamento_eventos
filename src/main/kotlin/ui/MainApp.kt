@@ -1,12 +1,8 @@
 package ui
 
 import logic.collections.ListaEventos
-import logic.entities.Evento
 import logic.entities.Participante
 import util.enums.CargoEnum
-import util.FileUtil
-import util.enums.StatusEnum
-import util.enums.TurnoEnum
 import javafx.application.Application
 import javafx.application.Application.launch
 import javafx.scene.Scene
@@ -14,7 +10,7 @@ import javafx.scene.control.Button
 import javafx.scene.control.TitledPane
 import javafx.scene.layout.VBox
 import javafx.stage.Stage
-import java.time.LocalDate
+import util.database.DatabaseInit
 
 val usuarioTesteColaborador = Participante(1, "João", "joao123@email.com", "123456", CargoEnum.COLABORADOR)
 
@@ -23,6 +19,7 @@ class MainApp : Application() {
     private val todosEventos = ListaEventos()
 
     override fun start(primaryStage: Stage) {
+        DatabaseInit.init()
         val telaGerenciarEventos = TelaGerenciarEventos(primaryStage, this, todosEventos, usuarioTesteColaborador)
         telaGerenciarEventos.carregarEventosDB()
         val btnEntrarColab = Button("Entrar como colaborador")
