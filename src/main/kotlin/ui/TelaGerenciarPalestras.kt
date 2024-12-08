@@ -9,9 +9,10 @@ import javafx.scene.layout.HBox
 import javafx.scene.layout.VBox
 import javafx.stage.Modality
 import javafx.stage.Stage
+import logic.database.PalestraDAO
 import logic.entities.Evento
 import logic.entities.Palestra
-import util.SequentialId
+import util.enums.StatusEnum
 import java.time.LocalTime
 
 class TelaGerenciarPalestras(
@@ -19,10 +20,10 @@ class TelaGerenciarPalestras(
     private val evento: Evento,
     private val telaGerenciarEventos: TelaGerenciarEventos
 ) {
-    private var id = SequentialId(1)
     private var vbox = VBox(10.0)
     private val resultadoText = SimpleStringProperty()
     private var resultadoLabel = Label()
+    private var palestraDAO = PalestraDAO()
 
     fun gerenciarPalestrasScene(): Scene {
         val pageLabel = Label("Gerenciamento de Palestras do Evento ${evento.nome}")
@@ -52,7 +53,7 @@ class TelaGerenciarPalestras(
         return scene
     }
 
-    fun cadastrarPalestraScene(): Scene {
+    private fun cadastrarPalestraScene(): Scene {
         resultadoLabel.textProperty().bind(resultadoText)
         resultadoText.set("")
         val labelTitulo = Label("Título da palestra:")
@@ -82,7 +83,7 @@ class TelaGerenciarPalestras(
 
             val novaPalestra =
                 Palestra(
-                    id.gerarId(),
+                    0,
                     inputTituloContent,
                     inputNomePalestranteContent,
                     inputLimitePartContent.toInt(),
@@ -91,11 +92,13 @@ class TelaGerenciarPalestras(
                     LocalTime.parse(inputHoraInicioContent),
                     LocalTime.parse(inputHoraTerminoContent)
                 )
-            val sucesso = evento.agenda.inserirPalestra(novaPalestra)
-            if (!sucesso) {
-                resultadoText.set("Erro ao cadastrar palestra! Conflito de horários")
-            } else {
+            val idGerado = palestraDAO.insertPalestra(evento.id, novaPalestra)
+            if (idGerado != null) {
+                novaPalestra.id = idGerado
+                evento.agenda.inserirPalestra(novaPalestra)
                 resultadoText.set("Palestra cadastrada com sucesso!")
+            } else {
+                resultadoText.set("Erro ao cadastrar palestra!")
             }
         }
 
@@ -128,12 +131,13 @@ class TelaGerenciarPalestras(
         return scene
     }
 
-    fun exibirPalestrasBox(): VBox {
+    private fun exibirPalestrasBox(): VBox {
         // TODO: adicionar filtro por data/horário
         // TODO: adicionar botão para atualizar horário da palestra
         val vbox = VBox(10.0)
         resultadoLabel.textProperty().bind(resultadoText)
-        val palestras = evento.agenda.buscarTodasPalestras()
+
+        val palestras = palestraDAO.getPalestras(evento.id).buscarTodasPalestras()
         if (palestras == null) {
             resultadoText.set("Não há palestras cadastradas para este evento")
             vbox.children.addAll(
@@ -149,7 +153,7 @@ class TelaGerenciarPalestras(
         return vbox
     }
 
-    fun gerenciarPalestrasTable(palestras: Array<Palestra?>): TableView<Palestra> {
+    private fun gerenciarPalestrasTable(palestras: Array<Palestra?>): TableView<Palestra> {
         val tableView = TableView<Palestra>()
 
         val colId = TableColumn<Palestra, Int>("ID")
@@ -175,6 +179,9 @@ class TelaGerenciarPalestras(
 
         val colLimiteParticipantes = TableColumn<Palestra, Int>("Limite de Participantes")
         colLimiteParticipantes.cellValueFactory = PropertyValueFactory("limiteParticipantes")
+
+        val colStatus = TableColumn<Palestra, StatusEnum>("Status")
+        colStatus.cellValueFactory = PropertyValueFactory("status")
 
         val actionColumn = TableColumn<Palestra, Void>("Ações")
         actionColumn.setCellFactory {
@@ -208,13 +215,13 @@ class TelaGerenciarPalestras(
             colHorarioInicio,
             colHorarioTermino,
             colLimiteParticipantes,
+            colStatus,
             actionColumn
         )
 
         val data = FXCollections.observableArrayList(palestras.filterNotNull())
         tableView.items = data
         return tableView
-
     }
 
     fun cancelarPalestraModal(palestra: Palestra) {
@@ -227,8 +234,12 @@ class TelaGerenciarPalestras(
         val btnVoltar = Button("Voltar")
 
         btnConfirmar.setOnAction {
-            val sucesso = evento.agenda.removerPalestraPeloId(palestra.id)
-            if (!sucesso) {
+            val sucesso = palestraDAO.deletePalestra(palestra.id)
+            if (sucesso) {
+                evento.agenda.removerPalestraPeloId(palestra.id)
+                vbox.children.clear()
+                primaryStage.scene = gerenciarPalestrasScene()
+            } else {
                 println("Erro ao cancelar palestra!")
             }
             modalStage.close()

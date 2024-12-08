@@ -21,7 +21,6 @@ class TelaGerenciarEventos(
     private val eventos: ListaEventos,
     val usuarioLogado: Participante
 ) {
-    private var id: SequentialId = SequentialId(7)
     private var vbox = VBox(10.0)
     private val resultadoText = SimpleStringProperty()
     private var resultadoLabel = Label()
