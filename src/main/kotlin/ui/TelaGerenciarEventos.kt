@@ -11,8 +11,8 @@ import javafx.stage.Stage
 import logic.collections.ListaEventos
 import logic.entities.Evento
 import util.enums.*
-import util.FileUtil
 import util.SequentialId
+import logic.database.EventoDAO
 import java.time.LocalDate
 
 class TelaGerenciarEventos(
@@ -21,31 +21,12 @@ class TelaGerenciarEventos(
     private val eventos: ListaEventos,
     val usuarioLogado: Participante
 ) {
-    private lateinit var id: SequentialId
+    private var id: SequentialId = SequentialId(7)
     private var vbox = VBox(10.0)
     private val resultadoText = SimpleStringProperty()
     private var resultadoLabel = Label()
     private lateinit var telaGerenciarPalestras: TelaGerenciarPalestras
-    private val fileUtil = FileUtil()
-
-    fun carregarEventosDB() {
-        val eventosDB = fileUtil.lerArquivoTxt("src/main/resources/db/eventos.txt")
-        id = SequentialId(eventosDB.size)
-        for (evento in eventosDB) {
-            val dados = evento.split(",")
-            val novoEvento = Evento(
-                dados[0].toInt(),
-                dados[1],
-                dados[2],
-                dados[3].toDouble(),
-                LocalDate.parse(dados[4]),
-                LocalDate.parse(dados[5]),
-                StatusEnum.valueOf(dados[6]),
-                TurnoEnum.valueOf(dados[7])
-            )
-            eventos.inserirEvento(novoEvento)
-        }
-    }
+    private val eventoDAO = EventoDAO()
 
     fun gerenciarEventosScene(): Scene {
         val pageLabel = Label("Gerenciamento de Eventos")
@@ -102,7 +83,7 @@ class TelaGerenciarEventos(
             val comboBoxTurnoContent = comboBoxTurno.selectionModel.selectedItem
             val novoEvento =
                 Evento(
-                    id.gerarId(),
+                    0,
                     inputNomeContent,
                     inputDescricaoContent,
                     inputValorInscricaoContent.toDouble(),
@@ -111,12 +92,14 @@ class TelaGerenciarEventos(
                     StatusEnum.PENDENTE,
                     comboBoxTurnoContent
                 )
-            eventos.inserirEvento(novoEvento)
-            resultadoText.set("Evento cadastrado com sucesso!")
-            fileUtil.anexarArquivoTxt(
-                "src/main/resources/db/eventos.txt",
-                novoEvento.toString()
-            )
+            val idGerado = eventoDAO.insertEvento(novoEvento)
+            if (idGerado != null) {
+                novoEvento.id = idGerado
+                eventos.inserirEvento(novoEvento)
+                resultadoText.set("Evento cadastrado com sucesso!")
+            } else {
+                resultadoText.set("Erro ao cadastrar evento!")
+            }
         }
 
         val btnVoltar = Button("Voltar")

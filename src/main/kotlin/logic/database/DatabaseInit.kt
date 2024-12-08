@@ -1,4 +1,4 @@
-package util.database
+package logic.database
 
 object DatabaseInit {
     fun init() {

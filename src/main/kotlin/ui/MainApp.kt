@@ -10,18 +10,22 @@ import javafx.scene.control.Button
 import javafx.scene.control.TitledPane
 import javafx.scene.layout.VBox
 import javafx.stage.Stage
-import util.database.DatabaseInit
+import logic.database.DatabaseInit
+import logic.database.EventoDAO
 
 val usuarioTesteColaborador = Participante(1, "João", "joao123@email.com", "123456", CargoEnum.COLABORADOR)
 
 class MainApp : Application() {
     private lateinit var initialScene: Scene
-    private val todosEventos = ListaEventos()
+    private val eventoDAO = EventoDAO()
+    private lateinit var todosEventos: ListaEventos
+
 
     override fun start(primaryStage: Stage) {
         DatabaseInit.init()
+        todosEventos = eventoDAO.getEventos()
         val telaGerenciarEventos = TelaGerenciarEventos(primaryStage, this, todosEventos, usuarioTesteColaborador)
-        telaGerenciarEventos.carregarEventosDB()
+
         val btnEntrarColab = Button("Entrar como colaborador")
         btnEntrarColab.setOnAction {
             primaryStage.scene = telaGerenciarEventos.gerenciarEventosScene()
@@ -39,7 +43,14 @@ class MainApp : Application() {
         val titledPane = TitledPane("App de Gerenciamento de Eventos", vbox)
 
         initialScene = Scene(titledPane, 1000.0, 600.0)
-        //initialScene.stylesheets.add(javaClass.getResource("src/main/resources/Style.css").toExternalForm())
+
+        // TODO: corrigir importação de arquivo de estilo
+        try {
+            val resource = javaClass.getResource("./styles/Style.css")
+            initialScene.stylesheets.add(resource!!.toExternalForm())
+        } catch (e: Exception) {
+            println("Erro ao carregar o arquivo de estilo")
+        }
         primaryStage.title = "HomePage"
         primaryStage.scene = initialScene
         primaryStage.show()

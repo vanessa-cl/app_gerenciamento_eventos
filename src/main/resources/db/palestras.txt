@@ -1,0 +1,2 @@
+1,1,Introdução ao Kotlin,Erica Meire,50,H408,2024-11-04,19:00,20:00,FINALIZADO
+1,2,Desenvolvimento de Aplicações Android com Kotlin,João Manoel,50,H408,2024-11-05,18:00,20:00,FINALIZADO

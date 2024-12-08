@@ -6,7 +6,7 @@ import util.enums.TurnoEnum
 import java.time.LocalDate
 
 data class Evento(
-    val id: Int,
+    var id: Int,
     val nome: String,
     val descricao: String,
     val valorInscricao: Double,
