@@ -3,7 +3,6 @@ package ui
 import logic.collections.ListaEventos
 import logic.entities.Evento
 import logic.entities.Palestra
-import util.SequentialId
 import java.time.LocalDate
 import java.time.LocalTime
 

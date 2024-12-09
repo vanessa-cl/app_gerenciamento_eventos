@@ -13,7 +13,8 @@ import javafx.stage.Stage
 import logic.database.DatabaseInit
 import logic.database.EventoDAO
 
-val usuarioTesteColaborador = Participante(1, "João", "joao123@email.com", "123456", CargoEnum.COLABORADOR)
+val usuarioTesteColaborador = Participante(1, "João", "joao123@email.com", "12345678900", CargoEnum.COLABORADOR)
+val usuarioTesteOuvinte = Participante(2, "Ana", "ana321@email.com", "00987654321", CargoEnum.OUVINTE)
 
 class MainApp : Application() {
     private lateinit var initialScene: Scene
@@ -23,23 +24,27 @@ class MainApp : Application() {
 
     override fun start(primaryStage: Stage) {
         DatabaseInit.init()
+
         todosEventos = eventoDAO.getEventos()
-        val telaGerenciarEventos = TelaGerenciarEventos(primaryStage, this, todosEventos, usuarioTesteColaborador)
 
         val btnEntrarColab = Button("Entrar como colaborador")
         btnEntrarColab.setOnAction {
+            val telaGerenciarEventos = TelaGerenciarEventos(primaryStage, this, todosEventos, usuarioTesteColaborador)
             primaryStage.scene = telaGerenciarEventos.gerenciarEventosScene()
         }
+
         val btnEntrarOuvinte = Button("Entrar como ouvinte")
         btnEntrarOuvinte.setOnAction {
-//            telaMenuEventos.menuOuvinteScene()
+            val telaMenuEventos = TelaMenuEventos(primaryStage, this, todosEventos, usuarioTesteOuvinte)
+            primaryStage.scene = telaMenuEventos.menuEventosScene()
         }
+
         val btnEncerrar = Button("Encerrar")
         btnEncerrar.setOnAction {
             primaryStage.close()
         }
 
-        val vbox = VBox(10.0, btnEntrarColab, btnEncerrar)
+        val vbox = VBox(10.0, btnEntrarColab, btnEntrarOuvinte, btnEncerrar)
         val titledPane = TitledPane("App de Gerenciamento de Eventos", vbox)
 
         initialScene = Scene(titledPane, 1000.0, 600.0)
@@ -56,7 +61,6 @@ class MainApp : Application() {
         primaryStage.show()
     }
 
-
     fun getInitialScene(): Scene {
         return initialScene
     }
@@ -65,27 +69,6 @@ class MainApp : Application() {
 fun main(args: Array<String>) {
     launch(MainApp::class.java, *args)
 }
-
-
-//val usuarioTesteColaborador = Participante(1, "João", "joao123@email.com", "123456", CargoEnum.COLABORADOR)
-//val usuarioTesteOuvinte = Participante(2, "Alana", "alana321@email.com", "654321", CargoEnum.OUVINTE)
-//
-//fun main() {
-//    val menuEventos = MenuEventos()
-//    var opcaoLogin: Int
-//    var encerrar = false
-//    while (!encerrar) {
-//        println("Digite 1 para colaborador, 2 para ouvinte ou 3 para encerrar:")
-//        opcaoLogin = readln().toInt()
-//        val usuario = if (opcaoLogin == 1) usuarioTesteColaborador else usuarioTesteOuvinte
-//        when (opcaoLogin) {
-//            1 -> menuEventos.mostrarMenuColaborador()
-//            2 -> menuEventos.mostrarMenuOuvinte(usuario)
-//            3 -> encerrar = true
-//            else -> println("Opção inválida! Tente novamente")
-//        }
-//    }
-//}
 
 
 

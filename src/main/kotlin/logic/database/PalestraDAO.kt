@@ -1,11 +1,8 @@
 package logic.database
 
 import logic.collections.AgendaPalestras
-import logic.collections.ListaEventos
-import logic.entities.Evento
 import logic.entities.Palestra
 import util.enums.StatusEnum
-import util.enums.TurnoEnum
 import java.time.LocalDate
 import java.time.LocalTime
 
@@ -14,6 +11,9 @@ interface IPalestraDAO {
     fun insertPalestra(idEvento: Int, palestra: Palestra): Int?
     fun updatePalestra(palestra: Palestra): Boolean
     fun deletePalestra(idPalestra: Int): Boolean
+    fun subscribeParticipante(idPalestra: Int, idParticipante: Int): Boolean
+    fun unsubscribeParticipante(idPalestra: Int, idParticipante: Int): Boolean
+    fun getSubscriptionsParticipante(idEvento: Int, idParticipante: Int): AgendaPalestras
 }
 
 class PalestraDAO : IPalestraDAO {
@@ -94,5 +94,70 @@ class PalestraDAO : IPalestraDAO {
             return linhasAlteradas > 0
         }
         return false
+    }
+
+    override fun subscribeParticipante(idPalestra: Int, idParticipante: Int): Boolean {
+        val connection = DatabaseUtil.getConnection()
+        val checkIfSubscriptionExistsSql =
+            "SELECT * FROM palestra_participantes WHERE idPalestra = ? AND idParticipante = ?"
+        val insertSubscriptionSql = "INSERT INTO palestra_participantes (idPalestra, idParticipante) VALUES (?, ?)"
+        connection?.use {
+            val checkStatement = it.prepareStatement(checkIfSubscriptionExistsSql)
+            checkStatement.setInt(1, idPalestra)
+            checkStatement.setInt(2, idParticipante)
+            val resultSet = checkStatement.executeQuery()
+            if (resultSet.next() && resultSet.getInt(1) > 0) {
+                println("Usuário já está inscrito na palestra!")
+                return false
+            }
+            val insertStatement = it.prepareStatement(insertSubscriptionSql)
+            insertStatement.setInt(1, idPalestra)
+            insertStatement.setInt(2, idParticipante)
+            val linhasAlteradas = insertStatement.executeUpdate()
+            return linhasAlteradas > 0
+        }
+        return false
+    }
+
+    override fun unsubscribeParticipante(idPalestra: Int, idParticipante: Int): Boolean {
+        val connection = DatabaseUtil.getConnection()
+        val sql =
+            "DELETE FROM palestra_participantes WHERE idPalestra = ? AND idParticipante = ?"
+        connection?.use {
+            val statement = it.prepareStatement(sql)
+            statement.setInt(1, idPalestra)
+            statement.setInt(2, idParticipante)
+            val linhasAlteradas = statement.executeUpdate()
+            return linhasAlteradas > 0
+        }
+        return false
+    }
+
+    override fun getSubscriptionsParticipante(idEvento: Int, idParticipante: Int): AgendaPalestras {
+        val connection = DatabaseUtil.getConnection()
+        val sql =
+            "SELECT * FROM palestras WHERE idEvento = ? AND id IN (SELECT idPalestra FROM palestra_participantes WHERE idParticipante = ?)"
+        val palestras = AgendaPalestras()
+        connection?.use {
+            val statement = it.prepareStatement(sql)
+            statement.setInt(1, idEvento)
+            statement.setInt(2, idParticipante)
+            val resultSet = statement.executeQuery()
+            while (resultSet.next()) {
+                val palestra = Palestra(
+                    id = resultSet.getInt("id"),
+                    titulo = resultSet.getString("titulo"),
+                    palestrante = resultSet.getString("palestrante"),
+                    limiteParticipantes = resultSet.getInt("limiteParticipantes"),
+                    local = resultSet.getString("local"),
+                    data = LocalDate.parse(resultSet.getString("data")),
+                    horarioInicio = LocalTime.parse(resultSet.getString("horarioInicio")),
+                    horarioFim = LocalTime.parse(resultSet.getString("horarioFim")),
+                    status = StatusEnum.valueOf(resultSet.getString("status")),
+                )
+                palestras.inserirPalestra(palestra)
+            }
+        }
+        return palestras
     }
 }

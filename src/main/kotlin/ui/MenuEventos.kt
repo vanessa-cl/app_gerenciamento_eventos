@@ -4,7 +4,6 @@ import logic.collections.ListaEventos
 import logic.entities.Evento
 import logic.entities.Participante
 import util.NotificationThread
-import util.SequentialId
 import java.time.LocalDate
 
 class MenuEventos() {

@@ -11,7 +11,6 @@ import javafx.stage.Stage
 import logic.collections.ListaEventos
 import logic.entities.Evento
 import util.enums.*
-import util.SequentialId
 import logic.database.EventoDAO
 import java.time.LocalDate
 
