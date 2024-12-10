@@ -6,6 +6,7 @@ import javafx.scene.layout.HBox
 import javafx.scene.layout.VBox
 import javafx.stage.Stage
 import logic.database.PalestraDAO
+import logic.database.ParticipanteDAO
 import logic.entities.Evento
 import logic.entities.Palestra
 import logic.entities.Participante
@@ -20,6 +21,7 @@ class TelaDetalhesEvento(
     private val vbox = VBox(10.0)
     private val palestraDAO = PalestraDAO()
     private val palestrasUI = PalestrasUI()
+    private val participanteDAO = ParticipanteDAO()
 
     fun detalhesEventoScene(): Scene {
         val pageLabel = Label(evento.nome)
@@ -59,7 +61,7 @@ class TelaDetalhesEvento(
             vboxInfo,
             hboxActions
         )
-
+        carregarDetalhesDB()
         val titledPane = TitledPane("Detalhes do Evento", vbox)
         val scene = Scene(titledPane, 1000.0, 600.0)
         primaryStage.title = "Detalhes do Evento"
@@ -68,9 +70,25 @@ class TelaDetalhesEvento(
         return scene
     }
 
+    private fun carregarDetalhesDB() {
+        val palestras = palestraDAO.getPalestras(evento.id)
+        evento.agenda = palestras
+        val todasPalestras = palestras.buscarTodasPalestras()
+
+        for (palestra in todasPalestras!!) {
+            if (palestra != null) {
+                val participantes =
+                    participanteDAO.getParticipantesPalestra(palestra.id, usuarioLogado.id)
+                palestra.participantes = participantes
+                val filaEspera = participanteDAO.getParticipantesFilaEspera(palestra.id)
+                palestra.filaEspera = filaEspera
+            }
+        }
+    }
+
     private fun agendaEventoScene(): Scene {
         val pageLabel = Label("Agenda do Evento ${evento.nome}")
-        val palestras = palestraDAO.getPalestras(evento.id).buscarTodasPalestras()
+        val palestras = evento.agenda.buscarTodasPalestras()
         if (palestras == null) {
             vbox.children.add(Label("Não há palestras cadastradas para este evento"))
         }
@@ -102,6 +120,7 @@ class TelaDetalhesEvento(
     }
 
     fun inscreverUsuario(palestra: Palestra) {
+
         val inscricao = palestraDAO.subscribeParticipante(palestra.id, usuarioLogado.id)
         val label = Label(if (inscricao) "Inscrição realizada com sucesso" else "Erro ao realizar inscrição")
         vbox.children.add(label)

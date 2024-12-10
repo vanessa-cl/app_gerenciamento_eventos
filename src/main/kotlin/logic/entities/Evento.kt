@@ -15,7 +15,7 @@ data class Evento(
     val status: StatusEnum = StatusEnum.PENDENTE,
     val turno: TurnoEnum
 ) {
-    val agenda = AgendaPalestras()
+    var agenda = AgendaPalestras()
 
     override fun toString(): String {
         return "$id,$nome,$descricao,$valorInscricao,$dataInicio,$dataFim,$status,$turno"

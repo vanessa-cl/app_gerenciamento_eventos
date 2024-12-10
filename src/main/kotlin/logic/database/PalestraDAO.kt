@@ -14,7 +14,6 @@ interface IPalestraDAO {
     fun subscribeParticipante(idPalestra: Int, idParticipante: Int): Boolean
     fun unsubscribeParticipante(idPalestra: Int, idParticipante: Int): Boolean
     fun getSubscriptionsParticipante(idEvento: Int, idParticipante: Int): AgendaPalestras
-    fun getSubscriptionsFilaEspera(idEvento: Int, idParticipante: Int): AgendaPalestras
 }
 
 class PalestraDAO : IPalestraDAO {

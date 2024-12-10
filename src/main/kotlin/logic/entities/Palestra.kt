@@ -17,8 +17,8 @@ data class Palestra(
     var horarioFim: LocalTime,
     var status: StatusEnum = StatusEnum.PENDENTE
 ) {
-    val participantes = ListaParticipantes(limiteParticipantes)
-    val filaEspera = FilaEspera()
+    var participantes = ListaParticipantes(limiteParticipantes)
+    var filaEspera = FilaEspera()
 
     fun getDuracao(): Int {
         return horarioFim.hour - horarioInicio.hour
