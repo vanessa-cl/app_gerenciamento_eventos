@@ -4,6 +4,7 @@ import javafx.scene.Scene
 import javafx.scene.control.*
 import javafx.scene.layout.HBox
 import javafx.scene.layout.VBox
+import javafx.stage.Modality
 import javafx.stage.Stage
 import logic.database.PalestraDAO
 import logic.database.ParticipanteDAO
@@ -120,10 +121,42 @@ class TelaDetalhesEvento(
     }
 
     fun inscreverUsuario(palestra: Palestra) {
+        val checarInscricao = palestra.participantes.buscarParticipantePeloId(usuarioLogado.id)
+        val label: Label
 
+        if (checarInscricao != null) {
+            label = Label("Você já está inscrito nesta palestra!")
+            vbox.children.add(label)
+            return
+        }
+        if (palestra.participantes.estaCheia()) {
+            // TODO: confirmar inscrição na fila de espera
+            inscricaoModal(palestra.titulo)
+        }
         val inscricao = palestraDAO.subscribeParticipante(palestra.id, usuarioLogado.id)
-        val label = Label(if (inscricao) "Inscrição realizada com sucesso" else "Erro ao realizar inscrição")
-        vbox.children.add(label)
+    }
+
+    private fun inscricaoModal(tituloPalestra: String) {
+        val modalStage = Stage()
+        modalStage.initModality(Modality.APPLICATION_MODAL)
+        modalStage.title = "Inscrição na fila de espera"
+        val label = Label("A palestra $tituloPalestra atingiu a capacidade máxima de participantes.")
+        val subLabel =
+            Label("Você pode se inscrever em outra palestra ou entrar na lista de espera. Você será avisado assim que houver vagas disponíveis.")
+        val btnOutraPalestra = Button("Escolher outra palestra")
+        btnOutraPalestra.setOnAction {
+            modalStage.close()
+        }
+        val btnFilaEspera = Button("Entrar na lista de espera")
+        btnFilaEspera.setOnAction {
+            modalStage.close()
+        }
+        val hbox = HBox(10.0, btnOutraPalestra, btnFilaEspera)
+        val vbox = VBox(10.0, label, subLabel, hbox)
+        val modalScene = Scene(vbox, 400.0, 150.0)
+
+        modalStage.scene = modalScene
+        modalStage.showAndWait()
     }
 
     private fun inscricoesUsuarioScene(): Scene {
