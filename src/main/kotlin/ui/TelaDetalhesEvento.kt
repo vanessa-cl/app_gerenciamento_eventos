@@ -25,8 +25,11 @@ class TelaDetalhesEvento(
     private val palestrasUI = PalestrasUI()
     private val participanteDAO = ParticipanteDAO()
 
-    fun detalhesEventoScene(): Scene {
+    init {
         carregarDetalhesDB()
+    }
+
+    fun detalhesEventoScene(): Scene {
         val pageLabel = Label(evento.nome)
         val vboxInfo = VBox(10.0)
         val infoLabel = Label("Detalhes do Evento")
@@ -143,8 +146,7 @@ class TelaDetalhesEvento(
             vbox.children.clear()
             primaryStage.scene = this.detalhesEventoScene()
         }
-        val palestras = palestraDAO.getSubscriptionsParticipante(evento.id, usuarioLogado.id).buscarTodasPalestras()
-        println(palestras)
+        val palestras = usuarioLogado.inscricoes.buscarTodasPalestras()
         if (palestras == null) {
             vbox.children.addAll(
                 Label("Você não está inscrito em nenhuma palestra deste evento"),
@@ -217,9 +219,11 @@ class TelaDetalhesEvento(
                 palestra.participantes.removerParticipantePeloId(usuarioLogado.id)
                 usuarioLogado.inscricoes.removerPalestraPeloId(palestra.id)
                 vbox.children.add(Label("Inscrição cancelada com sucesso!"))
+                moverFilaEspera(palestra)
             } else {
                 vbox.children.add(Label("Erro ao cancelar inscrição"))
             }
+            modalStage.close()
         }
         val btnVoltar = Button("Voltar")
         btnVoltar.setOnAction {
@@ -232,16 +236,19 @@ class TelaDetalhesEvento(
         modalStage.showAndWait()
     }
 
-    // TODO: definir onde a função será chamada
-    fun moverFilaEspera(palestra: Palestra) {
-        val participanteFilaEspera = palestra.filaEspera.removerParticipanteInicio()
+    private fun moverFilaEspera(palestra: Palestra) {
+        val participanteFilaEspera = palestra.filaEspera.buscarParticipanteInicio()
         if (participanteFilaEspera == null) {
             return
         }
-        palestra.participantes.inserirParticipante(participanteFilaEspera)
-        // TODO: notificar usuário da inscrição na palestra
-        // palestraDAO.subscribeParticipante(participanteFilaEspera)
-        // palestraDAO.unsubscribeParticipanteFilaEspera(participanteFilaEspera)
+
+        val inscricao = palestraDAO.subscribeParticipante(palestra.id, participanteFilaEspera.id)
+        if (inscricao) {
+            // TODO: notificar usuário da inscrição na palestra
+            palestraDAO.unsubscribeParticipanteFilaEspera(palestra.id, participanteFilaEspera.id)
+            palestra.filaEspera.removerParticipanteInicio()
+            palestra.participantes.inserirParticipante(participanteFilaEspera)
+        }
     }
 
 }
