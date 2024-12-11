@@ -6,6 +6,7 @@ import javafx.scene.layout.HBox
 import javafx.scene.layout.VBox
 import javafx.stage.Modality
 import javafx.stage.Stage
+import logic.database.EventoDAO
 import logic.database.PalestraDAO
 import logic.database.ParticipanteDAO
 import logic.entities.Evento
@@ -25,6 +26,7 @@ class TelaDetalhesEvento(
     private val participanteDAO = ParticipanteDAO()
 
     fun detalhesEventoScene(): Scene {
+        carregarDetalhesDB()
         val pageLabel = Label(evento.nome)
         val vboxInfo = VBox(10.0)
         val infoLabel = Label("Detalhes do Evento")
@@ -62,7 +64,6 @@ class TelaDetalhesEvento(
             vboxInfo,
             hboxActions
         )
-        carregarDetalhesDB()
         val titledPane = TitledPane("Detalhes do Evento", vbox)
         val scene = Scene(titledPane, 1000.0, 600.0)
         primaryStage.title = "Detalhes do Evento"
@@ -72,6 +73,7 @@ class TelaDetalhesEvento(
     }
 
     private fun carregarDetalhesDB() {
+        usuarioLogado.inscricoes = palestraDAO.getSubscriptionsParticipante(evento.id, usuarioLogado.id)
         val palestras = palestraDAO.getPalestras(evento.id)
         evento.agenda = palestras
         val todasPalestras = palestras.buscarTodasPalestras()
@@ -79,7 +81,7 @@ class TelaDetalhesEvento(
         for (palestra in todasPalestras!!) {
             if (palestra != null) {
                 val participantes =
-                    participanteDAO.getParticipantesPalestra(palestra.id, usuarioLogado.id)
+                    participanteDAO.getParticipantesPalestra(palestra.id, palestra.participantes.limiteParticipantes)
                 palestra.participantes = participantes
                 val filaEspera = participanteDAO.getParticipantesFilaEspera(palestra.id)
                 palestra.filaEspera = filaEspera
@@ -122,18 +124,21 @@ class TelaDetalhesEvento(
 
     fun inscreverUsuarioPalestra(palestra: Palestra) {
         val checarInscricao = palestra.participantes.buscarParticipantePeloId(usuarioLogado.id)
-        val label: Label
 
-        if (checarInscricao != null) {
-            label = Label("Você já está inscrito nesta palestra!")
-            vbox.children.add(label)
-            return
-        }
-        if (palestra.participantes.estaCheia()) {
-            // TODO: confirmar inscrição na fila de espera
+        if (checarInscricao == null && !palestra.participantes.estaCheia()) {
+            val inscricao = palestraDAO.subscribeParticipante(palestra.id, usuarioLogado.id)
+            if (inscricao) {
+                palestra.participantes.inserirParticipante(usuarioLogado)
+                usuarioLogado.inscricoes.inserirPalestra(palestra)
+                vbox.children.add(Label("Inscrição realizada com sucesso!"))
+            } else {
+                vbox.children.add(Label("Erro ao realizar inscrição"))
+            }
+        } else if (checarInscricao == null && palestra.participantes.estaCheia()) {
             inscricaoPalestraModal(palestra)
+        } else {
+            vbox.children.add(Label("Você já está inscrito nesta palestra!"))
         }
-        val inscricao = palestraDAO.subscribeParticipante(palestra.id, usuarioLogado.id)
     }
 
     private fun inscricaoPalestraModal(palestra: Palestra) {
@@ -154,9 +159,13 @@ class TelaDetalhesEvento(
             if (checarInscricao != null) {
                 vbox.children.add(Label("Você já está inscrito na lista de espera desta palestra!"))
             } else {
-                palestra.filaEspera.inserirParticipanteFim(usuarioLogado)
-                // palestraDAO.subscribeParticipanteFilaEspera(usuarioLogado)
-                vbox.children.add(Label("Inscrição na lista de espera realizada com sucesso!"))
+                val inscricao = palestraDAO.subscribeParticipanteFilaEspera(palestra.id, usuarioLogado.id)
+                if (!inscricao) {
+                    vbox.children.add(Label("Erro ao realizar inscrição na lista de espera"))
+                } else {
+                    palestra.filaEspera.inserirParticipanteFim(usuarioLogado)
+                    vbox.children.add(Label("Inscrição na lista de espera realizada com sucesso!"))
+                }
             }
             modalStage.close()
         }

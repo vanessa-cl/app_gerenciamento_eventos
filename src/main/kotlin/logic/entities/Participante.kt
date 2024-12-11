@@ -10,5 +10,5 @@ data class Participante(
     val cpf: String,
     val cargo: CargoEnum
 ) {
-    val agenda: AgendaPalestras = AgendaPalestras()
+    var inscricoes: AgendaPalestras = AgendaPalestras()
 }

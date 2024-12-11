@@ -4,7 +4,7 @@ import logic.entities.Participante
 import logic.structures.ListaEstatica
 import util.convertArray
 
-class ListaParticipantes(private var limiteParticipantes: Int) {
+class ListaParticipantes(var limiteParticipantes: Int) {
     private var participantes = ListaEstatica<Participante>(limiteParticipantes)
 
     fun inserirParticipante(participante: Participante): Boolean {

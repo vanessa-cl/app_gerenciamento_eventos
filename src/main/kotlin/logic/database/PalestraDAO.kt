@@ -14,6 +14,8 @@ interface IPalestraDAO {
     fun subscribeParticipante(idPalestra: Int, idParticipante: Int): Boolean
     fun unsubscribeParticipante(idPalestra: Int, idParticipante: Int): Boolean
     fun getSubscriptionsParticipante(idEvento: Int, idParticipante: Int): AgendaPalestras
+    fun subscribeParticipanteFilaEspera(idPalestra: Int, idParticipante: Int): Boolean
+    fun unsubscribeParticipanteFilaEspera(idPalestra: Int, idParticipante: Int): Boolean
 }
 
 class PalestraDAO : IPalestraDAO {
@@ -159,5 +161,42 @@ class PalestraDAO : IPalestraDAO {
             }
         }
         return palestras
+    }
+
+    override fun subscribeParticipanteFilaEspera(idPalestra: Int, idParticipante: Int): Boolean {
+        val connection = DatabaseUtil.getConnection()
+        val checkIfSubscriptionExistsSql =
+            "SELECT * FROM fila_espera WHERE idPalestra = ? AND idParticipante = ?"
+        val insertSubscriptionSql = "INSERT INTO fila_espera (idPalestra, idParticipante) VALUES (?, ?)"
+        connection?.use {
+            val checkStatement = it.prepareStatement(checkIfSubscriptionExistsSql)
+            checkStatement.setInt(1, idPalestra)
+            checkStatement.setInt(2, idParticipante)
+            val resultSet = checkStatement.executeQuery()
+            if (resultSet.next() && resultSet.getInt(1) > 0) {
+                println("Usuário já está inscrito na fila de espera!")
+                return false
+            }
+            val insertStatement = it.prepareStatement(insertSubscriptionSql)
+            insertStatement.setInt(1, idPalestra)
+            insertStatement.setInt(2, idParticipante)
+            val linhasAlteradas = insertStatement.executeUpdate()
+            return linhasAlteradas > 0
+        }
+        return false
+    }
+
+    override fun unsubscribeParticipanteFilaEspera(idPalestra: Int, idParticipante: Int): Boolean {
+        val connection = DatabaseUtil.getConnection()
+        val sql =
+            "DELETE FROM fila_espera WHERE idPalestra = ? AND idParticipante = ?"
+        connection?.use {
+            val statement = it.prepareStatement(sql)
+            statement.setInt(1, idPalestra)
+            statement.setInt(2, idParticipante)
+            val linhasAlteradas = statement.executeUpdate()
+            return linhasAlteradas > 0
+        }
+        return false
     }
 }

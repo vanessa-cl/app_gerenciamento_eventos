@@ -9,6 +9,7 @@ import javafx.scene.control.Button
 import javafx.scene.control.Label
 import javafx.scene.control.TextField
 import javafx.scene.control.TitledPane
+import javafx.scene.layout.HBox
 import javafx.scene.layout.VBox
 import javafx.stage.Stage
 import logic.database.DatabaseInit
@@ -54,8 +55,8 @@ class MainApp : Application() {
         btnEncerrar.setOnAction {
             primaryStage.close()
         }
-
-        vbox = VBox(10.0, pagelabel, labelUsuario, inputUsuario, labelCpf, inputCpf, btnLogin, btnEncerrar)
+        val hbox = HBox(10.0, btnLogin, btnEncerrar)
+        vbox = VBox(10.0, pagelabel, labelUsuario, inputUsuario, labelCpf, inputCpf, hbox)
         val titledPane = TitledPane("App de Gerenciamento de Eventos", vbox)
 
         initialScene = Scene(titledPane, 1000.0, 600.0)
