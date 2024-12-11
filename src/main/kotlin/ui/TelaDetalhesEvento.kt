@@ -96,7 +96,8 @@ class TelaDetalhesEvento(
             vbox.children.add(Label("Não há palestras cadastradas para este evento"))
         }
 
-        val table = agendaEventoTable(palestras!!)
+        val actionColumn = palestrasUI.getActionCollumn("Inscreva-se", ::inscreverUsuarioPalestra)
+        val tableView = palestrasUI.baseTablePalestras(palestras!!, actionColumn)
         val btnVoltar = Button("Voltar")
         btnVoltar.setOnAction {
             vbox.children.clear()
@@ -104,7 +105,7 @@ class TelaDetalhesEvento(
         }
         vbox.children.addAll(
             pageLabel,
-            table,
+            tableView,
             btnVoltar
         )
 
@@ -114,12 +115,6 @@ class TelaDetalhesEvento(
         primaryStage.scene = scene
         primaryStage.show()
         return scene
-    }
-
-    private fun agendaEventoTable(palestras: Array<Palestra?>): TableView<Palestra> {
-        val actionColumn = palestrasUI.getActionCollumn("Inscreva-se", ::inscreverUsuarioPalestra)
-        val tableView = palestrasUI.baseTablePalestras(palestras, actionColumn)
-        return tableView
     }
 
     fun inscreverUsuarioPalestra(palestra: Palestra) {
@@ -139,6 +134,39 @@ class TelaDetalhesEvento(
         } else {
             vbox.children.add(Label("Você já está inscrito nesta palestra!"))
         }
+    }
+
+    private fun inscricoesUsuarioScene(): Scene {
+        val pageLabel = Label("Minhas inscrições no Evento ${evento.nome}")
+        val btnVoltar = Button("Voltar")
+        btnVoltar.setOnAction {
+            vbox.children.clear()
+            primaryStage.scene = this.detalhesEventoScene()
+        }
+        val palestras = palestraDAO.getSubscriptionsParticipante(evento.id, usuarioLogado.id).buscarTodasPalestras()
+        println(palestras)
+        if (palestras == null) {
+            vbox.children.addAll(
+                Label("Você não está inscrito em nenhuma palestra deste evento"),
+                btnVoltar
+            )
+        }
+
+        val actionColumn = palestrasUI.getActionCollumn("Cancelar inscrição", ::cancelarInscricaoModal)
+        val tableView = palestrasUI.baseTablePalestras(palestras!!, actionColumn)
+
+        vbox.children.addAll(
+            pageLabel,
+            tableView,
+            btnVoltar
+        )
+
+        val titledPane = TitledPane("Minhas inscrições", vbox)
+        val scene = Scene(titledPane, 1000.0, 600.0)
+        primaryStage.title = "Minhas inscrições"
+        primaryStage.scene = scene
+        primaryStage.show()
+        return scene
     }
 
     private fun inscricaoPalestraModal(palestra: Palestra) {
@@ -177,6 +205,33 @@ class TelaDetalhesEvento(
         modalStage.showAndWait()
     }
 
+    fun cancelarInscricaoModal(palestra: Palestra) {
+        val modalStage = Stage()
+        modalStage.initModality(Modality.APPLICATION_MODAL)
+        modalStage.title = "Cancelar inscrição"
+        val label = Label("Tem certeza que deseja cancelar a inscrição?")
+        val btnConfirmar = Button("Confirmar")
+        btnConfirmar.setOnAction {
+            val inscricao = palestraDAO.unsubscribeParticipante(palestra.id, usuarioLogado.id)
+            if (inscricao) {
+                palestra.participantes.removerParticipantePeloId(usuarioLogado.id)
+                usuarioLogado.inscricoes.removerPalestraPeloId(palestra.id)
+                vbox.children.add(Label("Inscrição cancelada com sucesso!"))
+            } else {
+                vbox.children.add(Label("Erro ao cancelar inscrição"))
+            }
+        }
+        val btnVoltar = Button("Voltar")
+        btnVoltar.setOnAction {
+            modalStage.close()
+        }
+        val hbox = HBox(10.0, btnConfirmar, btnVoltar)
+        val vboxModal = VBox(10.0, label, hbox)
+        val modalScene = Scene(vboxModal, 400.0, 150.0)
+        modalStage.scene = modalScene
+        modalStage.showAndWait()
+    }
+
     // TODO: definir onde a função será chamada
     fun moverFilaEspera(palestra: Palestra) {
         val participanteFilaEspera = palestra.filaEspera.removerParticipanteInicio()
@@ -187,50 +242,6 @@ class TelaDetalhesEvento(
         // TODO: notificar usuário da inscrição na palestra
         // palestraDAO.subscribeParticipante(participanteFilaEspera)
         // palestraDAO.unsubscribeParticipanteFilaEspera(participanteFilaEspera)
-    }
-
-    private fun inscricoesUsuarioScene(): Scene {
-        val pageLabel = Label("Minhas inscrições no Evento ${evento.nome}")
-        val btnVoltar = Button("Voltar")
-        btnVoltar.setOnAction {
-            vbox.children.clear()
-            primaryStage.scene = this.detalhesEventoScene()
-        }
-        val palestras = palestraDAO.getSubscriptionsParticipante(evento.id, usuarioLogado.id).buscarTodasPalestras()
-        println(palestras)
-        if (palestras == null) {
-            vbox.children.addAll(
-                Label("Você não está inscrito em nenhuma palestra deste evento"),
-                btnVoltar
-            )
-        }
-
-        val table = inscricoesUsuarioTable(palestras!!)
-
-        vbox.children.addAll(
-            pageLabel,
-            table,
-            btnVoltar
-        )
-
-        val titledPane = TitledPane("Minhas inscrições", vbox)
-        val scene = Scene(titledPane, 1000.0, 600.0)
-        primaryStage.title = "Minhas inscrições"
-        primaryStage.scene = scene
-        primaryStage.show()
-        return scene
-    }
-
-    private fun inscricoesUsuarioTable(palestras: Array<Palestra?>): TableView<Palestra> {
-        val actionColumn = palestrasUI.getActionCollumn("Cancelar inscrição", ::cancelarInscricao)
-        val tableView = palestrasUI.baseTablePalestras(palestras, actionColumn)
-        return tableView
-    }
-
-    fun cancelarInscricao(palestra: Palestra) {
-        val inscricao = palestraDAO.unsubscribeParticipante(palestra.id, usuarioLogado.id)
-        val label = Label(if (inscricao) "Inscrição cancelada com sucesso" else "Erro ao cancelar inscrição")
-        vbox.children.add(label)
     }
 
 }
