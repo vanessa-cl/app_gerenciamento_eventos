@@ -23,7 +23,7 @@ class TelaGerenciarPalestras(
     private var vbox = VBox(10.0)
     private val resultadoText = SimpleStringProperty()
     private var resultadoLabel = Label()
-    private var palestraDAO = PalestraDAO()
+    private val palestraDAO = PalestraDAO()
 
     fun gerenciarPalestrasScene(): Scene {
         val pageLabel = Label("Gerenciamento de Palestras do Evento ${evento.nome}")

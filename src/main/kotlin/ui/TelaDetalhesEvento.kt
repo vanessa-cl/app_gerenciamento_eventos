@@ -115,12 +115,12 @@ class TelaDetalhesEvento(
     }
 
     private fun agendaEventoTable(palestras: Array<Palestra?>): TableView<Palestra> {
-        val actionColumn = palestrasUI.getActionCollumn("Inscreva-se", ::inscreverUsuario)
+        val actionColumn = palestrasUI.getActionCollumn("Inscreva-se", ::inscreverUsuarioPalestra)
         val tableView = palestrasUI.baseTablePalestras(palestras, actionColumn)
         return tableView
     }
 
-    fun inscreverUsuario(palestra: Palestra) {
+    fun inscreverUsuarioPalestra(palestra: Palestra) {
         val checarInscricao = palestra.participantes.buscarParticipantePeloId(usuarioLogado.id)
         val label: Label
 
@@ -131,16 +131,16 @@ class TelaDetalhesEvento(
         }
         if (palestra.participantes.estaCheia()) {
             // TODO: confirmar inscrição na fila de espera
-            inscricaoModal(palestra.titulo)
+            inscricaoPalestraModal(palestra)
         }
         val inscricao = palestraDAO.subscribeParticipante(palestra.id, usuarioLogado.id)
     }
 
-    private fun inscricaoModal(tituloPalestra: String) {
+    private fun inscricaoPalestraModal(palestra: Palestra) {
         val modalStage = Stage()
         modalStage.initModality(Modality.APPLICATION_MODAL)
         modalStage.title = "Inscrição na fila de espera"
-        val label = Label("A palestra $tituloPalestra atingiu a capacidade máxima de participantes.")
+        val label = Label("A palestra ${palestra.titulo} atingiu a capacidade máxima de participantes.")
         val subLabel =
             Label("Você pode se inscrever em outra palestra ou entrar na lista de espera. Você será avisado assim que houver vagas disponíveis.")
         val btnOutraPalestra = Button("Escolher outra palestra")
@@ -149,14 +149,35 @@ class TelaDetalhesEvento(
         }
         val btnFilaEspera = Button("Entrar na lista de espera")
         btnFilaEspera.setOnAction {
+            val checarInscricao = palestra.filaEspera.buscarParticipantePeloId(usuarioLogado.id)
+
+            if (checarInscricao != null) {
+                vbox.children.add(Label("Você já está inscrito na lista de espera desta palestra!"))
+            } else {
+                palestra.filaEspera.inserirParticipanteFim(usuarioLogado)
+                // palestraDAO.subscribeParticipanteFilaEspera(usuarioLogado)
+                vbox.children.add(Label("Inscrição na lista de espera realizada com sucesso!"))
+            }
             modalStage.close()
         }
         val hbox = HBox(10.0, btnOutraPalestra, btnFilaEspera)
-        val vbox = VBox(10.0, label, subLabel, hbox)
-        val modalScene = Scene(vbox, 400.0, 150.0)
+        val vboxModal = VBox(10.0, label, subLabel, hbox)
+        val modalScene = Scene(vboxModal, 400.0, 150.0)
 
         modalStage.scene = modalScene
         modalStage.showAndWait()
+    }
+
+    // TODO: definir onde a função será chamada
+    fun moverFilaEspera(palestra: Palestra) {
+        val participanteFilaEspera = palestra.filaEspera.removerParticipanteInicio()
+        if (participanteFilaEspera == null) {
+            return
+        }
+        palestra.participantes.inserirParticipante(participanteFilaEspera)
+        // TODO: notificar usuário da inscrição na palestra
+        // palestraDAO.subscribeParticipante(participanteFilaEspera)
+        // palestraDAO.unsubscribeParticipanteFilaEspera(participanteFilaEspera)
     }
 
     private fun inscricoesUsuarioScene(): Scene {
