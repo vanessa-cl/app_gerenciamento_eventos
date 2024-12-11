@@ -6,12 +6,35 @@ import logic.entities.Participante
 import util.enums.CargoEnum
 
 interface IParticipanteDAO {
+    fun getParticipanteNomeCpf(nome: String, cpf: String): Participante?
     fun getParticipante(idParticipante: Int): Participante?
     fun getParticipantesPalestra(idPalestra: Int, limParticipantes: Int): ListaParticipantes
     fun getParticipantesFilaEspera(idPalestra: Int): FilaEspera
 }
 
 class ParticipanteDAO : IParticipanteDAO {
+    override fun getParticipanteNomeCpf(nome: String, cpf: String): Participante? {
+        val connection = DatabaseUtil.getConnection()
+        var participante: Participante? = null
+        val sql = "SELECT * FROM participantes WHERE nome = ? AND cpf = ?"
+        connection?.use {
+            val statement = it.prepareStatement(sql)
+            statement.setString(1, nome)
+            statement.setString(2, cpf)
+            val resultSet = statement.executeQuery()
+            while (resultSet.next()) {
+                participante = Participante(
+                    id = resultSet.getInt("id"),
+                    nome = resultSet.getString("nome"),
+                    email = resultSet.getString("email"),
+                    cpf = resultSet.getString("cpf"),
+                    cargo = CargoEnum.valueOf(resultSet.getString("cargo"))
+                )
+            }
+        }
+        return participante
+    }
+
 
     override fun getParticipante(idParticipante: Int): Participante? {
         val connection = DatabaseUtil.getConnection()
