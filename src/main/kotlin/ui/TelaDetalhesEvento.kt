@@ -6,14 +6,13 @@ import javafx.scene.layout.HBox
 import javafx.scene.layout.VBox
 import javafx.stage.Modality
 import javafx.stage.Stage
-import logic.database.EventoDAO
 import logic.database.PalestraDAO
 import logic.database.ParticipanteDAO
 import logic.entities.Evento
 import logic.entities.Palestra
 import logic.entities.Participante
+import util.notifyUsers
 import util.ui.PalestrasUI
-import util.ui.loadDataDB
 
 class TelaDetalhesEvento(
     private val primaryStage: Stage,
@@ -27,7 +26,27 @@ class TelaDetalhesEvento(
     private val participanteDAO = ParticipanteDAO()
 
     init {
-        loadDataDB(usuarioLogado, evento, palestraDAO, participanteDAO)
+        loadDataDB()
+    }
+
+    private fun loadDataDB() {
+        usuarioLogado.inscricoes = palestraDAO.getSubscriptionsParticipante(evento.id, usuarioLogado.id)
+        println(
+            palestraDAO.getSubscriptionsParticipante(evento.id, usuarioLogado.id).buscarTodasPalestras()
+                .contentToString()
+        )
+        val palestras = palestraDAO.getPalestras(evento.id)
+//        println(usuarioLogado.inscricoes.buscarTodasPalestras().contentToString())
+        evento.agenda = palestras
+        val todasPalestras = palestras.buscarTodasPalestras()
+
+        for (palestra in todasPalestras) {
+            if (palestra != null) {
+                palestra.participantes =
+                    participanteDAO.getParticipantesPalestra(palestra.id, palestra.participantes.limiteParticipantes)
+                palestra.filaEspera = participanteDAO.getParticipantesFilaEspera(palestra.id)
+            }
+        }
     }
 
     fun detalhesEventoScene(): Scene {
@@ -131,7 +150,7 @@ class TelaDetalhesEvento(
             primaryStage.scene = this.detalhesEventoScene()
         }
         val palestras = usuarioLogado.inscricoes.buscarTodasPalestras()
-        if (palestras == null) {
+        if (palestras.contentEquals(emptyArray())) {
             vbox.children.addAll(
                 Label("Você não está inscrito em nenhuma palestra deste evento"),
                 btnVoltar
@@ -139,7 +158,7 @@ class TelaDetalhesEvento(
         }
 
         val actionColumn = palestrasUI.getActionCollumn("Cancelar inscrição", ::cancelarInscricaoModal)
-        val tableView = palestrasUI.baseTablePalestras(palestras!!, actionColumn)
+        val tableView = palestrasUI.baseTablePalestras(palestras, actionColumn)
 
         vbox.children.addAll(
             pageLabel,
@@ -228,10 +247,14 @@ class TelaDetalhesEvento(
 
         val inscricao = palestraDAO.subscribeParticipante(palestra.id, participanteFilaEspera.id)
         if (inscricao) {
-            // TODO: notificar usuário da inscrição na palestra
             palestraDAO.unsubscribeParticipanteFilaEspera(palestra.id, participanteFilaEspera.id)
             palestra.filaEspera.removerParticipanteInicio()
             palestra.participantes.inserirParticipante(participanteFilaEspera)
+            participanteFilaEspera.inscricoes.inserirPalestra(palestra)
+            notifyUsers(
+                "Sua inscrição na palestra ${palestra.titulo} foi confirmada devido ao surgimento de uma vaga disponível",
+                arrayOf(participanteFilaEspera)
+            )
         }
     }
 

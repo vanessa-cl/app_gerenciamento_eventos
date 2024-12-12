@@ -15,6 +15,7 @@ import javafx.stage.Stage
 import logic.database.DatabaseInit
 import logic.database.EventoDAO
 import logic.database.ParticipanteDAO
+import util.notifyUsers
 
 class MainApp : Application() {
     private lateinit var initialScene: Scene
@@ -35,6 +36,8 @@ class MainApp : Application() {
         val btnLogin = Button("Entrar")
 
         btnLogin.setOnAction {
+
+
             val usuario = participanteDAO.getParticipanteNomeCpf(inputUsuario.text, inputCpf.text)
             if (usuario == null) {
                 vbox.children.add(Label("Usuário/Cpf inválido"))

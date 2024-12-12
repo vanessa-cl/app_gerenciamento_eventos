@@ -18,7 +18,7 @@ import logic.entities.Participante
 import logic.structures.ListaEstatica
 import util.enums.StatusEnum
 import util.enums.TurnoEnum
-import util.ui.loadDataDB
+import util.notifyUsers
 import java.time.LocalTime
 
 class TelaGerenciarPalestras(
@@ -36,7 +36,24 @@ class TelaGerenciarPalestras(
 
     init {
         resultadoLabel.textProperty().bind(resultadoText)
-        loadDataDB(usuarioLogado, evento, palestraDAO, participanteDAO)
+        loadDataDB()
+    }
+
+    private fun loadDataDB() {
+        usuarioLogado.inscricoes = palestraDAO.getSubscriptionsParticipante(evento.id, usuarioLogado.id)
+        val palestras = palestraDAO.getPalestras(evento.id)
+        evento.agenda = palestras
+        val todasPalestras = palestras.buscarTodasPalestras()
+
+        for (palestra in todasPalestras!!) {
+            if (palestra != null) {
+                val participantes =
+                    participanteDAO.getParticipantesPalestra(palestra.id, palestra.participantes.limiteParticipantes)
+                palestra.participantes = participantes
+                val filaEspera = participanteDAO.getParticipantesFilaEspera(palestra.id)
+                palestra.filaEspera = filaEspera
+            }
+        }
     }
 
     fun gerenciarPalestrasScene(): Scene {
@@ -217,7 +234,6 @@ class TelaGerenciarPalestras(
     }
 
     private fun exibirPalestrasBox(): VBox {
-        // TODO: adicionar filtro por data/horário
         val vbox = VBox(10.0)
         val btnOrdenarPorDataHora = Button("Ordenar por data e horário")
         val btnOrdenarPorId = Button("Ordenar por ID")
@@ -345,6 +361,10 @@ class TelaGerenciarPalestras(
                 evento.agenda.removerPalestraPeloId(palestra.id)
                 vbox.children.clear()
                 primaryStage.scene = gerenciarPalestrasScene()
+                notifyUsers(
+                    "A palestra ${palestra.titulo} agendada para ${palestra.data} foi cancelada",
+                    palestra.participantes.buscarTodosParticipantes()!!.filterNotNull().toTypedArray()
+                )
             } else {
                 println("Erro ao cancelar palestra!")
             }
@@ -440,7 +460,6 @@ class TelaGerenciarPalestras(
                 LocalTime.parse(inputHorarioFim.text)
             )
             if (atualizar) {
-                println(atualizar)
                 vbox.children.clear()
                 evento.agenda.atualizarHorarioPalestra(
                     palestra,
@@ -450,8 +469,11 @@ class TelaGerenciarPalestras(
                 )
                 println("Palestra atualizada!")
                 primaryStage.scene = gerenciarPalestrasScene()
-                loadDataDB(usuarioLogado, evento, palestraDAO, participanteDAO)
-                // TODO: notificar usuários inscritos
+                loadDataDB()
+                notifyUsers(
+                    "O horário da palestra ${palestra.titulo} foi atualizado para às ${comboBoxHorarioInicio.value}",
+                    palestra.participantes.buscarTodosParticipantes()!!.filterNotNull().toTypedArray()
+                )
             } else {
                 println("Erro ao atualizar horário da palestra!")
             }
