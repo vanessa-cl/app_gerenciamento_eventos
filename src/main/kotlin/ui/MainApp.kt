@@ -50,7 +50,7 @@ class MainApp : Application() {
                 inputUsuario.clear()
                 inputCpf.clear()
                 if (usuario.cargo == CargoEnum.COLABORADOR) {
-                    val telaGerenciarEventos = TelaGerenciarEventos(primaryStage, this, root, todosEventos, usuario)
+                    val telaGerenciarEventos = TelaGerenciarEventos(primaryStage, this, todosEventos, usuario)
                     primaryStage.scene = telaGerenciarEventos.gerenciarEventosScene()
                 } else {
                     val telaMenuEventos = TelaMenuEventos(primaryStage, this, todosEventos, usuario)

@@ -21,13 +21,11 @@ import javafx.geometry.Insets
 class TelaGerenciarEventos(
     private val primaryStage: Stage,
     private val mainApp: MainApp,
-    private val root: VBox,
     private val eventos: ListaEventos,
     val usuarioLogado: Participante
 ) {
     private var titulo = "Gerenciamento de Eventos"
     private val header = Header(primaryStage, mainApp, usuarioLogado, titulo)
-    private var vbox = VBox(10.0)
     private val resultadoText = SimpleStringProperty()
     private var resultadoLabel = Label()
     private lateinit var telaGerenciarPalestras: TelaGerenciarPalestras
@@ -38,7 +36,6 @@ class TelaGerenciarEventos(
         gerenciarEventosVBox.children.add(header.getHeader())
         val btnCadastro = Button("Cadastrar novo evento")
         btnCadastro.setOnAction {
-            vbox.children.clear()
             primaryStage.scene = cadastrarEventoScene()
         }
 
@@ -196,7 +193,13 @@ class TelaGerenciarEventos(
                     btn.setOnAction {
                         val evento = tableView.items[index]
                         telaGerenciarPalestras =
-                            TelaGerenciarPalestras(primaryStage, evento, this@TelaGerenciarEventos, usuarioLogado)
+                            TelaGerenciarPalestras(
+                                primaryStage,
+                                mainApp,
+                                evento,
+                                this@TelaGerenciarEventos,
+                                usuarioLogado
+                            )
                         primaryStage.scene = telaGerenciarPalestras.gerenciarPalestrasScene()
                     }
                 }

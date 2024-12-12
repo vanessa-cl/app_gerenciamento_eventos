@@ -5,6 +5,8 @@ import javafx.scene.Scene
 import javafx.scene.control.*
 import javafx.scene.control.cell.PropertyValueFactory
 import javafx.beans.property.SimpleStringProperty
+import javafx.geometry.Insets
+import javafx.geometry.Pos
 import javafx.scene.layout.HBox
 import javafx.scene.layout.VBox
 import javafx.stage.Modality
@@ -19,14 +21,18 @@ import logic.structures.ListaEstatica
 import util.enums.StatusEnum
 import util.enums.TurnoEnum
 import util.notifyUsers
+import util.ui.Header
 import java.time.LocalTime
 
 class TelaGerenciarPalestras(
     private val primaryStage: Stage,
+    private val mainApp: MainApp,
     private val evento: Evento,
     private val telaGerenciarEventos: TelaGerenciarEventos,
     private val usuarioLogado: Participante
 ) {
+    private var titulo = "Gerenciamento de Palestras do Evento ${evento.nome}"
+    private val header = Header(primaryStage, mainApp, usuarioLogado, titulo)
     private var vbox = VBox(10.0)
     private val resultadoText = SimpleStringProperty()
     private var resultadoLabel = Label()
@@ -57,27 +63,27 @@ class TelaGerenciarPalestras(
     }
 
     fun gerenciarPalestrasScene(): Scene {
-        val pageLabel = Label("Gerenciamento de Palestras do Evento ${evento.nome}")
-        val vboxPalestras = exibirPalestrasBox()
+        val gerenciarPalestrasVBox = VBox(10.0)
+        gerenciarPalestrasVBox.children.add(header.getHeader())
+
         val btnCadastro = Button("Cadastrar nova palestra")
         btnCadastro.setOnAction {
-            vbox.children.clear()
             primaryStage.scene = cadastrarPalestraScene()
         }
+
         val btnVoltar = Button("Voltar")
         btnVoltar.setOnAction {
+            gerenciarPalestrasVBox.children.clear()
             primaryStage.scene = telaGerenciarEventos.gerenciarEventosScene()
         }
-        vbox = VBox(
-            10.0,
-            pageLabel,
-            vboxPalestras,
-            btnCadastro,
-            btnVoltar
+
+        gerenciarPalestrasVBox.children.addAll(
+            exibirPalestrasBox().apply { alignment = Pos.CENTER; maxWidth = 1300.0 },
+            HBox(10.0, btnCadastro, btnVoltar).apply { alignment = Pos.BOTTOM_RIGHT }
         )
 
-        val titledPane = TitledPane("Gerenciamento de Palestras", vbox)
-        val scene = Scene(titledPane, 1000.0, 600.0)
+        gerenciarPalestrasVBox.apply { spacing = 10.0; padding = Insets(10.0) }
+        val scene = Scene(gerenciarPalestrasVBox, 1300.0, 600.0)
         primaryStage.title = "Gerenciar Palestras"
         primaryStage.scene = scene
         primaryStage.show()
@@ -85,26 +91,40 @@ class TelaGerenciarPalestras(
     }
 
     private fun cadastrarPalestraScene(): Scene {
+        val cadastrarPalestraVbox = VBox(10.0)
+        cadastrarPalestraVbox.children.add(header.getHeader())
+
         resultadoLabel.textProperty().bind(resultadoText)
         resultadoText.set("")
-        val labelTitulo = Label("Título da palestra:")
+
         val inputTitulo = TextField()
-        val labelNomePalestrante = Label("Nome do palestrante:")
         val inputNomePalestrante = TextField()
-        val labelLocal = Label("Local:")
         val inputLocal = TextField()
-        val labelLimitePart = Label("Limite de participantes:")
         val inputLimitePart = TextField()
-        val labelData = Label("Data da palestra:")
         val inputData = DatePicker()
-        val duracaoLabel = Label("Duração da palestra em horas:")
         val inputDuracao = TextField()
-        val labelHoraInicio = Label("Horário de início:")
         val comboBoxHoraInicio = ComboBox<String>()
-        val labelHoraTermino = Label("Horário de término:")
         val inputHoraTermino = TextField()
         val horarios = buscarHorarios(evento.turno)
         var palestrasExistentes: Array<Palestra?>? = null
+
+        val linha1Hbox = HBox(10.0)
+        linha1Hbox.children.addAll(
+            VBox(Label("Título da palestra:"), inputTitulo),
+            VBox(Label("Nome do palestrante:"), inputNomePalestrante),
+            VBox(Label("Duração da palestra em horas:"), inputDuracao),
+            VBox(Label("Data:"), inputData),
+        )
+        linha1Hbox.apply { spacing = 10.0 }
+
+        val linha2Hbox = HBox(10.0)
+        linha2Hbox.children.addAll(
+            VBox(Label("Local:"), inputLocal),
+            VBox(Label("Limite de participantes:"), inputLimitePart),
+            VBox(Label("Horário de início:"), comboBoxHoraInicio),
+            VBox(Label("Horário de término:"), inputHoraTermino),
+        )
+        linha2Hbox.apply { spacing = 10.0 }
 
         inputData.valueProperty().addListener { _, _, valor ->
             palestrasExistentes = null
@@ -173,30 +193,24 @@ class TelaGerenciarPalestras(
         btnVoltar.setOnAction {
             primaryStage.scene = gerenciarPalestrasScene()
         }
-        vbox.children.addAll(
-            labelTitulo,
-            inputTitulo,
-            labelNomePalestrante,
-            inputNomePalestrante,
-            labelLocal,
-            inputLocal,
-            labelLimitePart,
-            inputLimitePart,
-            duracaoLabel,
-            inputDuracao,
-            labelData,
-            inputData,
-            labelHoraInicio,
-            comboBoxHoraInicio,
-            labelHoraTermino,
-            inputHoraTermino,
-            resultadoLabel,
-            btnConfirmar,
-            btnVoltar
-        )
-        val titledPane = TitledPane("Cadastrar nova palestra", vbox)
-        val scene = Scene(titledPane, 1000.0, 600.0)
 
+        cadastrarPalestraVbox.children.addAll(
+            VBox(
+                10.0,
+                Label("Preencha os campos abaixo para cadastrar uma nova palestra:").apply {
+                    alignment = Pos.TOP_LEFT
+                },
+                linha1Hbox,
+                linha2Hbox,
+                HBox(10.0, btnConfirmar, btnVoltar).apply { alignment = Pos.BOTTOM_RIGHT }
+            ).apply { alignment = Pos.TOP_LEFT; padding = Insets(10.0) },
+        )
+
+        cadastrarPalestraVbox.apply { spacing = 10.0; padding = Insets(10.0) }
+        val scene = Scene(cadastrarPalestraVbox, 900.0, 400.0)
+        primaryStage.title = "Cadastro de Palestras"
+        primaryStage.scene = scene
+        primaryStage.show()
         return scene
     }
 
@@ -270,7 +284,7 @@ class TelaGerenciarPalestras(
         val tableView = gerenciarPalestrasTable(palestras)
 
         vbox.children.addAll(
-            btnOrdenarPorDataHora,
+            HBox(10.0, btnOrdenarPorDataHora).apply { alignment = Pos.TOP_LEFT },
             tableView
         )
         return vbox
