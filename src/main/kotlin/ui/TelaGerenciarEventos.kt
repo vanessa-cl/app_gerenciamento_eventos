@@ -2,10 +2,12 @@ package ui
 
 import javafx.beans.property.SimpleStringProperty
 import javafx.collections.FXCollections
+import javafx.geometry.Pos
 import logic.entities.Participante
 import javafx.scene.Scene
 import javafx.scene.control.*
 import javafx.scene.control.cell.PropertyValueFactory
+import javafx.scene.layout.HBox
 import javafx.scene.layout.VBox
 import javafx.stage.Stage
 import logic.collections.ListaEventos
@@ -14,6 +16,7 @@ import util.enums.*
 import logic.database.EventoDAO
 import util.ui.Header
 import java.time.LocalDate
+import javafx.geometry.Insets
 
 class TelaGerenciarEventos(
     private val primaryStage: Stage,
@@ -22,61 +25,66 @@ class TelaGerenciarEventos(
     private val eventos: ListaEventos,
     val usuarioLogado: Participante
 ) {
-    private val header = Header(primaryStage, mainApp, usuarioLogado)
+    private var titulo = "Gerenciamento de Eventos"
+    private val header = Header(primaryStage, mainApp, usuarioLogado, titulo)
     private var vbox = VBox(10.0)
     private val resultadoText = SimpleStringProperty()
     private var resultadoLabel = Label()
     private lateinit var telaGerenciarPalestras: TelaGerenciarPalestras
     private val eventoDAO = EventoDAO()
 
-    init {
-        root.children.add(header)
-    }
-
     fun gerenciarEventosScene(): Scene {
-        val pageLabel = Label("Gerenciamento de Eventos")
-        val vboxEventos = exibirEventosBox()
+        val gerenciarEventosVBox = VBox(10.0)
+        gerenciarEventosVBox.children.add(header.getHeader())
         val btnCadastro = Button("Cadastrar novo evento")
         btnCadastro.setOnAction {
             vbox.children.clear()
             primaryStage.scene = cadastrarEventoScene()
         }
-        val btnVoltar = Button("Voltar")
-        btnVoltar.setOnAction {
-            primaryStage.scene = mainApp.getInitialScene()
-        }
-        vbox = VBox(
-            10.0,
-            pageLabel,
-            vboxEventos,
-            btnCadastro,
-            btnVoltar
+
+        gerenciarEventosVBox.children.addAll(
+            exibirEventosBox().apply { alignment = Pos.CENTER; maxWidth = 1300.0 },
+            HBox(10.0, btnCadastro).apply { alignment = Pos.BOTTOM_RIGHT }
         )
 
-        val titledPane = TitledPane("Gerenciamento de Eventos", vbox)
-        val scene = Scene(titledPane, 1000.0, 600.0)
-        primaryStage.title = "Gerenciar Eventos"
+        gerenciarEventosVBox.apply { spacing = 10.0; padding = Insets(10.0) }
+        val scene = Scene(gerenciarEventosVBox, 1300.0, 600.0)
+        primaryStage.title = "Gerenciamento de Eventos"
         primaryStage.scene = scene
         primaryStage.show()
         return scene
     }
 
     private fun cadastrarEventoScene(): Scene {
+        val cadastrarEventoVbox = VBox(10.0)
+        cadastrarEventoVbox.children.add(header.getHeader())
+
         resultadoLabel.textProperty().bind(resultadoText)
         resultadoText.set("")
-        val labelNome = Label("Nome do evento:")
+
         val inputNome = TextField()
-        val labelDataInicio = Label("Data de início:")
         val inputDataInicio = DatePicker()
-        val labelDataTermino = Label("Data de término:")
         val inputDataTermino = DatePicker()
-        val labelDescricao = Label("Descrição:")
         val inputDescricao = TextField()
-        val labelValorInscricao = Label("Valor da inscrição (Ex: R$0.00):")
         val inputValorInscricao = TextField()
-        val labelTurno = Label("Turno:")
         val comboBoxTurno = ComboBox<TurnoEnum>()
         comboBoxTurno.items.addAll(TurnoEnum.entries)
+
+        val linha1Hbox = HBox(10.0)
+        linha1Hbox.children.addAll(
+            VBox(Label("Nome do evento:"), inputNome),
+            VBox(Label("Data de início:"), inputDataInicio),
+            VBox(Label("Data de término:"), inputDataTermino),
+        )
+        linha1Hbox.apply { spacing = 10.0 }
+
+        val linha2Hbox = HBox(10.0)
+        linha2Hbox.children.addAll(
+            VBox(Label("Descrição:"), inputDescricao),
+            VBox(Label("Valor da inscrição (Ex: 10.0):"), inputValorInscricao),
+            VBox(Label("Turno:"), comboBoxTurno),
+        )
+        linha2Hbox.apply { spacing = 10.0 }
 
         val btnConfirmar = Button("Cadastrar")
         btnConfirmar.setOnAction {
@@ -111,26 +119,24 @@ class TelaGerenciarEventos(
         btnVoltar.setOnAction {
             primaryStage.scene = gerenciarEventosScene()
         }
-        vbox.children.addAll(
-            labelNome,
-            inputNome,
-            labelDataInicio,
-            inputDataInicio,
-            labelDataTermino,
-            inputDataTermino,
-            labelTurno,
-            comboBoxTurno,
-            labelDescricao,
-            inputDescricao,
-            labelValorInscricao,
-            inputValorInscricao,
-            resultadoLabel,
-            btnConfirmar,
-            btnVoltar
-        )
-        val titledPane = TitledPane("Cadastrar novo evento", vbox)
-        val scene = Scene(titledPane, 1000.0, 600.0)
 
+        cadastrarEventoVbox.children.addAll(
+            VBox(
+                10.0,
+                Label("Preencha os campos abaixo para cadastrar um novo evento:").apply {
+                    alignment = Pos.TOP_LEFT
+                },
+                linha1Hbox,
+                linha2Hbox,
+                HBox(10.0, btnConfirmar, btnVoltar).apply { alignment = Pos.BOTTOM_RIGHT }
+            ).apply { alignment = Pos.TOP_LEFT; padding = Insets(10.0) },
+        )
+
+        cadastrarEventoVbox.apply { spacing = 10.0; padding = Insets(10.0) }
+        val scene = Scene(cadastrarEventoVbox, 900.0, 400.0)
+        primaryStage.title = "Cadastro de Eventos"
+        primaryStage.scene = scene
+        primaryStage.show()
         return scene
     }
 

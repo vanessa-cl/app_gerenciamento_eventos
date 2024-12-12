@@ -10,7 +10,6 @@ import javafx.scene.Scene
 import javafx.scene.control.Button
 import javafx.scene.control.Label
 import javafx.scene.control.TextField
-import javafx.scene.control.TitledPane
 import javafx.scene.layout.HBox
 import javafx.scene.layout.VBox
 import javafx.stage.Stage
@@ -23,7 +22,6 @@ class MainApp : Application() {
     private val eventoDAO = EventoDAO()
     private val participanteDAO = ParticipanteDAO()
     private lateinit var todosEventos: ListaEventos
-    private var vbox = VBox(10.0)
     private val root = VBox()
     private val loginVbox = VBox()
 
@@ -32,14 +30,22 @@ class MainApp : Application() {
         todosEventos = eventoDAO.getEventos()
 
         val inputUsuario = TextField()
-        inputUsuario.maxWidth = 300.0
         val inputCpf = TextField()
-        inputCpf.maxWidth = 300.0
+        val usuarioBox = VBox(5.0, Label("Usuário:"), inputUsuario).apply {
+            alignment = Pos.TOP_LEFT; maxWidth = 300.0
+        }
+        val cpfBox = VBox(5.0, Label("CPF:"), inputCpf).apply {
+            alignment = Pos.TOP_LEFT; maxWidth = 300.0
+        }
+        val formLoginVbox = VBox(10.0, usuarioBox, cpfBox).apply {
+            alignment = Pos.CENTER_LEFT; maxWidth = 300.0
+        }
+
         val btnLogin = Button("Entrar")
         btnLogin.setOnAction {
             val usuario = participanteDAO.getParticipanteNomeCpf(inputUsuario.text, inputCpf.text)
             if (usuario == null) {
-                vbox.children.add(Label("Usuário/Cpf inválido"))
+                formLoginVbox.children.add(Label("Usuário/Cpf inválido"))
             } else {
                 inputUsuario.clear()
                 inputCpf.clear()
@@ -58,20 +64,10 @@ class MainApp : Application() {
             primaryStage.close()
         }
 
-        val usuarioBox = VBox(5.0, Label("Usuário:"), inputUsuario).apply {
-            alignment = Pos.TOP_LEFT
-        }
-        val cpfBox = VBox(5.0, Label("CPF:"), inputCpf).apply {
-            alignment = Pos.TOP_LEFT
-        }
-        val formBox = VBox(10.0, usuarioBox, cpfBox).apply {
-            alignment = Pos.CENTER_LEFT
-        }
-
         loginVbox.children.addAll(
             Label("Bem-vindo ao App de Gerenciamento de Eventos!"),
             Label("Por favor, faça login para continuar:"),
-            formBox,
+            formLoginVbox,
             HBox(10.0, btnLogin, btnEncerrar).apply { alignment = Pos.CENTER }
         )
         loginVbox.apply { alignment = Pos.CENTER; spacing = 10.0; maxWidth = 300.0 }
@@ -89,7 +85,7 @@ class MainApp : Application() {
 //            println("Erro ao carregar o arquivo de estilo")
 //        }
 
-        initialScene = Scene(root, 1000.0, 600.0)
+        initialScene = Scene(root, 900.0, 400.0)
         primaryStage.title = "Login"
         primaryStage.scene = initialScene
         primaryStage.show()
