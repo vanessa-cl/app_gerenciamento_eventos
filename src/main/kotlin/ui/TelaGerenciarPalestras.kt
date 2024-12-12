@@ -10,9 +10,13 @@ import javafx.scene.layout.VBox
 import javafx.stage.Modality
 import javafx.stage.Stage
 import logic.database.PalestraDAO
+import logic.database.HorarioDAO
 import logic.entities.Evento
 import logic.entities.Palestra
+import logic.structures.ListaEstatica
 import util.enums.StatusEnum
+import util.enums.TurnoEnum
+import java.time.LocalDate
 import java.time.LocalTime
 
 class TelaGerenciarPalestras(
@@ -24,6 +28,7 @@ class TelaGerenciarPalestras(
     private val resultadoText = SimpleStringProperty()
     private var resultadoLabel = Label()
     private val palestraDAO = PalestraDAO()
+    private val horarioDAO = HorarioDAO()
 
     fun gerenciarPalestrasScene(): Scene {
         val pageLabel = Label("Gerenciamento de Palestras do Evento ${evento.nome}")
@@ -66,31 +71,67 @@ class TelaGerenciarPalestras(
         val inputLimitePart = TextField()
         val labelData = Label("Data da palestra:")
         val inputData = DatePicker()
+        val duracaoLabel = Label("Duração da palestra em horas:")
+        val inputDuracao = TextField()
         val labelHoraInicio = Label("Horário de início:")
-        val inputHoraInicio = TextField()
+        val comboBoxHoraInicio = ComboBox<String>()
         val labelHoraTermino = Label("Horário de término:")
         val inputHoraTermino = TextField()
+        val horarios = buscarHorarios(evento.turno)
+        var palestrasExistentes: Array<Palestra?>? = null
+
+        inputData.valueProperty().addListener { _, _, valor ->
+            palestrasExistentes = null
+            comboBoxHoraInicio.items.clear()
+            inputHoraTermino.clear()
+            if (valor != null && inputDuracao.text != null) {
+                palestrasExistentes = palestraDAO.getPalestras(evento.id).buscarTodasPalestrasPorDia(valor)
+                for (horario in horarios.selecionarTodos()) {
+                    if (horario == null) {
+                        continue
+                    } else {
+                        if (isHorarioDisponivel(
+                                LocalTime.parse(horario.toString()),
+                                inputDuracao.text.toLong(),
+                                palestrasExistentes
+                            )
+                        ) {
+                            comboBoxHoraInicio.items.add(horario.toString())
+                        }
+                    }
+                }
+            }
+        }
+
+        inputDuracao.textProperty().addListener { _, _, valor ->
+            inputData.value = null
+            comboBoxHoraInicio.items.clear()
+            inputHoraTermino.clear()
+        }
+
+        comboBoxHoraInicio.valueProperty().addListener { _, _, valor ->
+            inputHoraTermino.clear()
+            if (valor != null && inputDuracao.text != null && palestrasExistentes != null) {
+                val horaInicio = LocalTime.parse(valor)
+                if (isHorarioDisponivel(horaInicio, inputDuracao.text.toLong(), palestrasExistentes)) {
+                    inputHoraTermino.text = horaInicio.plusHours(inputDuracao.text.toLong()).toString()
+                }
+            }
+        }
 
         val btnConfirmar = Button("Cadastrar")
         btnConfirmar.setOnAction {
-            val inputTituloContent = inputTitulo.text
-            val inputNomePalestranteContent = inputNomePalestrante.text
-            val inputLocalContent = inputLocal.text
-            val inputLimitePartContent = inputLimitePart.text
-            val inputDataContent = inputData.value
-            val inputHoraInicioContent = inputHoraInicio.text
-            val inputHoraTerminoContent = inputHoraTermino.text
-
             val novaPalestra =
                 Palestra(
                     0,
-                    inputTituloContent,
-                    inputNomePalestranteContent,
-                    inputLimitePartContent.toInt(),
-                    inputLocalContent,
-                    inputDataContent,
-                    LocalTime.parse(inputHoraInicioContent),
-                    LocalTime.parse(inputHoraTerminoContent)
+                    inputTitulo.text,
+                    inputNomePalestrante.text,
+                    inputLimitePart.text.toInt(),
+                    inputLocal.text,
+                    inputData.value,
+                    inputDuracao.text.toLong(),
+                    LocalTime.parse(comboBoxHoraInicio.value),
+                    LocalTime.parse(inputHoraTermino.text)
                 )
             val idGerado = palestraDAO.insertPalestra(evento.id, novaPalestra)
             if (idGerado != null) {
@@ -115,10 +156,12 @@ class TelaGerenciarPalestras(
             inputLocal,
             labelLimitePart,
             inputLimitePart,
+            duracaoLabel,
+            inputDuracao,
             labelData,
             inputData,
             labelHoraInicio,
-            inputHoraInicio,
+            comboBoxHoraInicio,
             labelHoraTermino,
             inputHoraTermino,
             resultadoLabel,
@@ -129,6 +172,39 @@ class TelaGerenciarPalestras(
         val scene = Scene(titledPane, 1000.0, 600.0)
 
         return scene
+    }
+
+    private fun isHorarioDisponivel(
+        novaHoraInicio: LocalTime,
+        novaDuracao: Long,
+        palestras: Array<Palestra?>?
+    ): Boolean {
+        val novaHoraTermino = novaHoraInicio.plusHours(novaDuracao)
+
+        if (palestras == null) {
+            return true
+        }
+        for (palestra in palestras) {
+            if (palestra != null) {
+                val horaInicioExistente = palestra.horarioInicio
+                val horaTerminoExistente = palestra.horarioFim
+
+                if (novaHoraInicio.isBefore(horaTerminoExistente) && novaHoraInicio.isAfter(
+                        horaInicioExistente.minusMinutes(
+                            1
+                        )
+                    )
+                ) {
+                    return false
+                }
+
+                if (novaHoraTermino.isBefore(horaTerminoExistente) && novaHoraTermino.isAfter(horaInicioExistente)) {
+                    return false
+                }
+            }
+        }
+
+        return true
     }
 
     private fun exibirPalestrasBox(): VBox {
@@ -171,6 +247,9 @@ class TelaGerenciarPalestras(
         val colData = TableColumn<Palestra, String>("Data")
         colData.cellValueFactory = PropertyValueFactory("data")
 
+        val colDuracao = TableColumn<Palestra, String>("Duração em Horas")
+        colDuracao.cellValueFactory = PropertyValueFactory("duracao")
+
         val colHorarioInicio = TableColumn<Palestra, String>("Horário de Início")
         colHorarioInicio.cellValueFactory = PropertyValueFactory("horarioInicio")
 
@@ -186,12 +265,17 @@ class TelaGerenciarPalestras(
         val actionColumn = TableColumn<Palestra, Void>("Ações")
         actionColumn.setCellFactory {
             object : TableCell<Palestra, Void>() {
-                private val btn = Button("Cancelar")
+                private val btnCancelar = Button("Cancelar")
+                private val btnAtualizarHorario = Button("Atualizar horário")
 
                 init {
-                    btn.setOnAction {
+                    btnCancelar.setOnAction {
                         val palestra = tableView.items[index]
                         cancelarPalestraModal(palestra)
+                    }
+                    btnAtualizarHorario.setOnAction {
+                        val palestra = tableView.items[index]
+                        atualizarHorarioPalestraModal(palestra)
                     }
                 }
 
@@ -200,7 +284,7 @@ class TelaGerenciarPalestras(
                     if (empty) {
                         graphic = null
                     } else {
-                        graphic = btn
+                        graphic = HBox(10.0, btnCancelar, btnAtualizarHorario)
                     }
                 }
             }
@@ -257,18 +341,61 @@ class TelaGerenciarPalestras(
         modalStage.showAndWait()
     }
 
-//    fun atualizarHorarioPalestraModal(palestra: Palestra) {
-//        println("Digite o novo horário de início (HH:MM):")
-//        val horarioInicio = readln()
-//        println("Digite o novo horário de término (HH:MM):")
-//        val horarioTermino = readln()
-//        val sucesso = evento.agenda()
-//            .atualizarHorarioPalestra(palestra, LocalTime.parse(horarioInicio), LocalTime.parse(horarioTermino))
-//        if (!sucesso) {
-//            println("Erro ao atualizar horário da palestra! Conflito de horários")
-//            return
-//        }
-//        println("Horário da palestra atualizado com sucesso!")
-//        return
-//    }
+    private fun buscarHorarios(turno: TurnoEnum): ListaEstatica<String> {
+        return horarioDAO.getHorariosPorTurno(turno)
+    }
+
+    fun atualizarHorarioPalestraModal(palestra: Palestra) {
+        val modalStage = Stage()
+        modalStage.initModality(Modality.APPLICATION_MODAL)
+        modalStage.title = "Atualizar horário da palestra ${palestra.titulo}"
+        val horariosDisponiveis = buscarHorarios(evento.turno)
+
+        val tituloLabel = Label("Título: ${palestra.titulo}")
+        val dataLabel = Label("Data: ${palestra.data}")
+        val localLabel = Label("Local: ${palestra.local}")
+        val limLabel = Label("Limite de participantes: ${palestra.limiteParticipantes}")
+        val horarioInicioLabel = Label("Horário de início")
+        val horarioInicioComboBox = ComboBox<String>()
+
+        for (horario in horariosDisponiveis.selecionarTodos()) {
+            horarioInicioComboBox.items.add(horario.toString())
+
+        }
+        horariosDisponiveis.buscarPosicao(palestra.horarioInicio.toString())
+
+
+//        horarioInicioComboBox.selectionModel.selectFirst()
+        val horarioFimLabel = Label("Horário de término")
+        val horarioFimComboBox = ComboBox<String>()
+        val btnConfirmar = Button("Confirmar")
+        val btnVoltar = Button("Voltar")
+
+        btnConfirmar.setOnAction {
+//            val atualizar = palestraDAO.atualizarHorarioPalestra(palestra.id, horarioInicioComboBox.value)
+//            if (atualizar) {
+//                vbox.children.clear()
+//                primaryStage.scene = gerenciarPalestrasScene()
+//            } else {
+//                println("Erro ao atualizar horário da palestra!")
+//            }
+            modalStage.close()
+        }
+
+        btnVoltar.setOnAction {
+            modalStage.close()
+        }
+
+
+        val vboxPalestra = VBox(10.0, tituloLabel, dataLabel, localLabel, limLabel)
+        val vboxHorarioInicio = VBox(10.0, horarioInicioLabel, horarioInicioComboBox)
+        val vboxHorarioFim = VBox(10.0, horarioFimLabel, horarioFimComboBox)
+        val hboxBtn = HBox(10.0, btnConfirmar, btnVoltar)
+        val vbox = VBox(10.0, vboxPalestra, vboxHorarioInicio, vboxHorarioFim, hboxBtn)
+        val modalScene = Scene(vbox, 400.0, 150.0)
+
+        modalStage.scene = modalScene
+        modalStage.showAndWait()
+    }
+
 }

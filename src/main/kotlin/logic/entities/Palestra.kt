@@ -13,6 +13,7 @@ data class Palestra(
     val limiteParticipantes: Int,
     val local: String,
     val data: LocalDate,
+    val duracao: Long,
     var horarioInicio: LocalTime,
     var horarioFim: LocalTime,
     var status: StatusEnum = StatusEnum.PENDENTE
@@ -20,11 +21,7 @@ data class Palestra(
     var participantes = ListaParticipantes(limiteParticipantes)
     var filaEspera = FilaEspera()
 
-    fun getDuracao(): Int {
-        return horarioFim.hour - horarioInicio.hour
-    }
-
     override fun toString(): String {
-        return "$id,$titulo,$palestrante,$limiteParticipantes,$local,$data,$horarioInicio,$horarioFim,$status"
+        return "$id,$titulo,$palestrante,$limiteParticipantes,$local,$data,$duracao,$horarioInicio,$horarioFim,$status"
     }
 }

@@ -34,6 +34,7 @@ class PalestraDAO : IPalestraDAO {
                     limiteParticipantes = resultSet.getInt("limiteParticipantes"),
                     local = resultSet.getString("local"),
                     data = LocalDate.parse(resultSet.getString("data")),
+                    duracao = resultSet.getInt("duracaoEmHoras").toLong(),
                     horarioInicio = LocalTime.parse(resultSet.getString("horarioInicio")),
                     horarioFim = LocalTime.parse(resultSet.getString("horarioFim")),
                     status = StatusEnum.valueOf(resultSet.getString("status")),
@@ -48,7 +49,7 @@ class PalestraDAO : IPalestraDAO {
         val connection = DatabaseUtil.getConnection()
         println(palestra.toString())
         val sql =
-            "INSERT INTO palestras (idEvento, titulo, palestrante, limiteParticipantes, local, data, horarioInicio, horarioFim, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)"
+            "INSERT INTO palestras (idEvento, titulo, palestrante, limiteParticipantes, local, data, horarioInicio, horarioFim, status, duracaoEmHoras) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
         connection?.use {
             val statement = it.prepareStatement(sql)
             statement.setInt(1, idEvento)
@@ -60,6 +61,7 @@ class PalestraDAO : IPalestraDAO {
             statement.setString(7, palestra.horarioInicio.toString())
             statement.setString(8, palestra.horarioFim.toString())
             statement.setString(9, palestra.status.name)
+            statement.setInt(10, palestra.duracao.toInt())
             val linhasAlteradas = statement.executeUpdate()
             if (linhasAlteradas > 0) {
                 val idsGerados = statement.generatedKeys
@@ -153,6 +155,7 @@ class PalestraDAO : IPalestraDAO {
                     limiteParticipantes = resultSet.getInt("limiteParticipantes"),
                     local = resultSet.getString("local"),
                     data = LocalDate.parse(resultSet.getString("data")),
+                    duracao = resultSet.getInt("duracaoEmHoras").toLong(),
                     horarioInicio = LocalTime.parse(resultSet.getString("horarioInicio")),
                     horarioFim = LocalTime.parse(resultSet.getString("horarioFim")),
                     status = StatusEnum.valueOf(resultSet.getString("status")),

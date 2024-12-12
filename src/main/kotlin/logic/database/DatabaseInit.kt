@@ -26,6 +26,7 @@ object DatabaseInit {
                 limiteParticipantes INTEGER,
                 local TEXT,
                 data TEXT,
+                duracaoHoras INTEGER,
                 horarioInicio TEXT,
                 horarioFim TEXT,
                 status TEXT,
@@ -57,6 +58,24 @@ object DatabaseInit {
                 PRIMARY KEY (idPalestra, idParticipante),
                 FOREIGN KEY (idPalestra) REFERENCES palestras(id),
                 FOREIGN KEY (idParticipante) REFERENCES participantes(id)
+            );
+            """,
+            """
+            CREATE TABLE IF NOT EXISTS horarios_matutino (
+                id INTEGER PRIMARY KEY,
+                horario TEXT NOT NULL
+            );
+            """,
+            """
+            CREATE TABLE IF NOT EXISTS horarios_vespertino (
+                id INTEGER PRIMARY KEY,
+                horario TEXT NOT NULL
+            );
+            """,
+            """
+            CREATE TABLE IF NOT EXISTS horarios_noturno (
+                id INTEGER PRIMARY KEY,
+                horario TEXT NOT NULL
             );
             """
         )
