@@ -362,13 +362,11 @@ class TelaGerenciarPalestras(
 
     fun cancelarPalestraModal(palestra: Palestra) {
         val modalStage = Stage()
+        val cancelarPalestraVbox = VBox(10.0)
         modalStage.initModality(Modality.APPLICATION_MODAL)
         modalStage.title = "Tem certeza de que deseja cancelar a palestra?"
 
-        val alerta = Label("Esta ação não poderá ser revertida.")
         val btnConfirmar = Button("Confirmar")
-        val btnVoltar = Button("Voltar")
-
         btnConfirmar.setOnAction {
             val sucesso = palestraDAO.deletePalestra(palestra.id)
             if (sucesso) {
@@ -385,14 +383,21 @@ class TelaGerenciarPalestras(
             modalStage.close()
         }
 
+        val btnVoltar = Button("Voltar")
         btnVoltar.setOnAction {
             modalStage.close()
         }
 
-        val hbox = HBox(10.0, btnConfirmar, btnVoltar)
-        val vbox = VBox(10.0, alerta, hbox)
-        val modalScene = Scene(vbox, 400.0, 150.0)
+        cancelarPalestraVbox.children.addAll(
+            HBox(
+                10.0,
+                Label("Essa ação não pode ser revertida. Deseja realmente cancelar a palestra ${palestra.titulo}?")
+            ).apply { alignment = Pos.TOP_LEFT },
+            HBox(10.0, btnConfirmar, btnVoltar).apply { alignment = Pos.BOTTOM_RIGHT }
+        )
 
+        cancelarPalestraVbox.apply { spacing = 10.0; padding = Insets(10.0) }
+        val modalScene = Scene(cancelarPalestraVbox, 600.0, 150.0)
         modalStage.scene = modalScene
         modalStage.showAndWait()
     }
@@ -403,21 +408,37 @@ class TelaGerenciarPalestras(
 
     fun atualizarHorarioPalestraModal(palestra: Palestra) {
         val modalStage = Stage()
+        val atualizarHorarioVbox = VBox(10.0)
         modalStage.initModality(Modality.APPLICATION_MODAL)
         modalStage.title = "Atualizar horário da palestra ${palestra.titulo}"
 
-        val tituloLabel = Label("Título: ${palestra.titulo}")
-        val dataLabel = Label("Data: ${palestra.data}")
-        val localLabel = Label("Local: ${palestra.local}")
-        val limLabel = Label("Limite de participantes: ${palestra.limiteParticipantes}")
-        val duracaoLabel = Label("Duração da palestra em horas")
+        val inputTitulo = TextField(palestra.titulo).apply { isEditable = false; isDisable = true }
+        val inputData = TextField(palestra.data.toString()).apply { isEditable = false; isDisable = true }
+        val inputLocal = TextField(palestra.local).apply { isEditable = false; isDisable = true }
+        val inputLimitePart =
+            TextField(palestra.limiteParticipantes.toString()).apply { isEditable = false; isDisable = true }
         val inputDuracao = TextField()
-        val horarioInicioLabel = Label("Horário de início")
         val comboBoxHorarioInicio = ComboBox<String>()
-        val horarioFimLabel = Label("Horário de término")
-        val inputHorarioFim = TextField()
+        val inputHorarioFim = TextField().apply { isEditable = false; isDisable = true }
         val horarios = buscarHorarios(evento.turno)
         val palestrasExistentes = palestraDAO.getPalestras(evento.id).buscarTodasPalestrasPorDia(palestra.data)
+
+        val linha1Hbox = HBox(10.0)
+        linha1Hbox.children.addAll(
+            VBox(Label("Título:"), inputTitulo),
+            VBox(Label("Data:"), inputData),
+            VBox(Label("Local:"), inputLocal),
+            VBox(Label("Limite de participantes:"), inputLimitePart),
+        )
+        linha1Hbox.apply { spacing = 10.0 }
+
+        val linha2Hbox = HBox(10.0)
+        linha2Hbox.children.addAll(
+            VBox(Label("Duração:"), inputDuracao),
+            VBox(Label("Horário de início"), comboBoxHorarioInicio),
+            VBox(Label("Horário de término:"), inputHorarioFim),
+        )
+        linha2Hbox.apply { spacing = 10.0 }
 
         for (horario in horarios.selecionarTodos()) {
             if (horario == null) {
@@ -464,8 +485,6 @@ class TelaGerenciarPalestras(
         }
 
         val btnConfirmar = Button("Confirmar")
-        val btnVoltar = Button("Voltar")
-
         btnConfirmar.setOnAction {
             val atualizar = palestraDAO.updatePalestra(
                 palestra,
@@ -494,18 +513,25 @@ class TelaGerenciarPalestras(
             modalStage.close()
         }
 
+        val btnVoltar = Button("Voltar")
         btnVoltar.setOnAction {
             modalStage.close()
         }
 
-        val vboxDuracao = VBox(10.0, duracaoLabel, inputDuracao)
-        val vboxPalestra = VBox(10.0, tituloLabel, dataLabel, localLabel, limLabel)
-        val vboxHorarioInicio = VBox(10.0, horarioInicioLabel, comboBoxHorarioInicio)
-        val vboxHorarioFim = VBox(10.0, horarioFimLabel, inputHorarioFim)
-        val hboxBtn = HBox(10.0, btnConfirmar, btnVoltar)
-        val vbox = VBox(10.0, vboxPalestra, vboxDuracao, vboxHorarioInicio, vboxHorarioFim, hboxBtn)
-        val modalScene = Scene(vbox, 500.0, 350.0)
+        atualizarHorarioVbox.children.addAll(
+            VBox(
+                10.0,
+                Label("Preencha os campos abaixo para atualizar o horário da palestra:").apply {
+                    alignment = Pos.TOP_LEFT
+                },
+                linha1Hbox,
+                linha2Hbox,
+                HBox(10.0, btnConfirmar, btnVoltar).apply { alignment = Pos.BOTTOM_RIGHT }
+            ).apply { alignment = Pos.TOP_LEFT; padding = Insets(10.0) },
+        )
 
+        atualizarHorarioVbox.apply { spacing = 10.0; padding = Insets(10.0) }
+        val modalScene = Scene(atualizarHorarioVbox, 900.0, 400.0)
         modalStage.scene = modalScene
         modalStage.showAndWait()
     }
