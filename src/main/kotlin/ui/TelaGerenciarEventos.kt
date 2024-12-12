@@ -12,19 +12,26 @@ import logic.collections.ListaEventos
 import logic.entities.Evento
 import util.enums.*
 import logic.database.EventoDAO
+import util.ui.Header
 import java.time.LocalDate
 
 class TelaGerenciarEventos(
     private val primaryStage: Stage,
     private val mainApp: MainApp,
+    private val root: VBox,
     private val eventos: ListaEventos,
     val usuarioLogado: Participante
 ) {
+    private val header = Header(primaryStage, mainApp, usuarioLogado)
     private var vbox = VBox(10.0)
     private val resultadoText = SimpleStringProperty()
     private var resultadoLabel = Label()
     private lateinit var telaGerenciarPalestras: TelaGerenciarPalestras
     private val eventoDAO = EventoDAO()
+
+    init {
+        root.children.add(header)
+    }
 
     fun gerenciarEventosScene(): Scene {
         val pageLabel = Label("Gerenciamento de Eventos")
