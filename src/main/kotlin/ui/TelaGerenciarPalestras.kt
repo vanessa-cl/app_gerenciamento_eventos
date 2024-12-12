@@ -11,24 +11,33 @@ import javafx.stage.Modality
 import javafx.stage.Stage
 import logic.database.PalestraDAO
 import logic.database.HorarioDAO
+import logic.database.ParticipanteDAO
 import logic.entities.Evento
 import logic.entities.Palestra
+import logic.entities.Participante
 import logic.structures.ListaEstatica
 import util.enums.StatusEnum
 import util.enums.TurnoEnum
-import java.time.LocalDate
+import util.ui.loadDataDB
 import java.time.LocalTime
 
 class TelaGerenciarPalestras(
     private val primaryStage: Stage,
     private val evento: Evento,
-    private val telaGerenciarEventos: TelaGerenciarEventos
+    private val telaGerenciarEventos: TelaGerenciarEventos,
+    private val usuarioLogado: Participante
 ) {
     private var vbox = VBox(10.0)
     private val resultadoText = SimpleStringProperty()
     private var resultadoLabel = Label()
     private val palestraDAO = PalestraDAO()
+    private val participanteDAO = ParticipanteDAO()
     private val horarioDAO = HorarioDAO()
+
+    init {
+        resultadoLabel.textProperty().bind(resultadoText)
+        loadDataDB(usuarioLogado, evento, palestraDAO, participanteDAO)
+    }
 
     fun gerenciarPalestrasScene(): Scene {
         val pageLabel = Label("Gerenciamento de Palestras do Evento ${evento.nome}")
@@ -209,7 +218,6 @@ class TelaGerenciarPalestras(
 
     private fun exibirPalestrasBox(): VBox {
         // TODO: adicionar filtro por data/horário
-        // TODO: adicionar botão para atualizar horário da palestra
         val vbox = VBox(10.0)
         resultadoLabel.textProperty().bind(resultadoText)
 
@@ -222,14 +230,6 @@ class TelaGerenciarPalestras(
             return vbox
         }
 
-        val table = gerenciarPalestrasTable(palestras)
-        vbox.children.addAll(
-            table
-        )
-        return vbox
-    }
-
-    private fun gerenciarPalestrasTable(palestras: Array<Palestra?>): TableView<Palestra> {
         val tableView = TableView<Palestra>()
 
         val colId = TableColumn<Palestra, Int>("ID")
@@ -295,6 +295,7 @@ class TelaGerenciarPalestras(
             colTitulo,
             colPalestrante,
             colLocal,
+            colDuracao,
             colData,
             colHorarioInicio,
             colHorarioTermino,
@@ -305,7 +306,10 @@ class TelaGerenciarPalestras(
 
         val data = FXCollections.observableArrayList(palestras.filterNotNull())
         tableView.items = data
-        return tableView
+        vbox.children.addAll(
+            tableView
+        )
+        return vbox
     }
 
     fun cancelarPalestraModal(palestra: Palestra) {
@@ -349,36 +353,90 @@ class TelaGerenciarPalestras(
         val modalStage = Stage()
         modalStage.initModality(Modality.APPLICATION_MODAL)
         modalStage.title = "Atualizar horário da palestra ${palestra.titulo}"
-        val horariosDisponiveis = buscarHorarios(evento.turno)
 
         val tituloLabel = Label("Título: ${palestra.titulo}")
         val dataLabel = Label("Data: ${palestra.data}")
         val localLabel = Label("Local: ${palestra.local}")
         val limLabel = Label("Limite de participantes: ${palestra.limiteParticipantes}")
+        val duracaoLabel = Label("Duração da palestra em horas")
+        val inputDuracao = TextField()
         val horarioInicioLabel = Label("Horário de início")
-        val horarioInicioComboBox = ComboBox<String>()
-
-        for (horario in horariosDisponiveis.selecionarTodos()) {
-            horarioInicioComboBox.items.add(horario.toString())
-
-        }
-        horariosDisponiveis.buscarPosicao(palestra.horarioInicio.toString())
-
-
-//        horarioInicioComboBox.selectionModel.selectFirst()
+        val comboBoxHorarioInicio = ComboBox<String>()
         val horarioFimLabel = Label("Horário de término")
-        val horarioFimComboBox = ComboBox<String>()
+        val inputHorarioFim = TextField()
+        val horarios = buscarHorarios(evento.turno)
+        val palestrasExistentes = palestraDAO.getPalestras(evento.id).buscarTodasPalestrasPorDia(palestra.data)
+
+        for (horario in horarios.selecionarTodos()) {
+            if (horario == null) {
+                continue
+            } else {
+                if (isHorarioDisponivel(
+                        LocalTime.parse(horario.toString()),
+                        palestra.duracao,
+                        palestrasExistentes
+                    )
+                ) {
+                    comboBoxHorarioInicio.items.add(horario.toString())
+                }
+            }
+        }
+
+        inputDuracao.textProperty().addListener { _, _, valor ->
+            comboBoxHorarioInicio.items.clear()
+            inputHorarioFim.clear()
+            for (horario in horarios.selecionarTodos()) {
+                if (horario == null) {
+                    continue
+                } else {
+                    if (isHorarioDisponivel(
+                            LocalTime.parse(horario.toString()),
+                            inputDuracao.text.toLong(),
+                            palestrasExistentes
+                        )
+                    ) {
+                        comboBoxHorarioInicio.items.add(horario.toString())
+                    }
+                }
+            }
+        }
+
+        comboBoxHorarioInicio.valueProperty().addListener { _, _, valor ->
+            inputHorarioFim.clear()
+            if (valor != null && inputDuracao.text != null && palestrasExistentes != null) {
+                val horaInicio = LocalTime.parse(valor)
+                if (isHorarioDisponivel(horaInicio, inputDuracao.text.toLong(), palestrasExistentes)) {
+                    inputHorarioFim.text = horaInicio.plusHours(inputDuracao.text.toLong()).toString()
+                }
+            }
+        }
+
         val btnConfirmar = Button("Confirmar")
         val btnVoltar = Button("Voltar")
 
         btnConfirmar.setOnAction {
-//            val atualizar = palestraDAO.atualizarHorarioPalestra(palestra.id, horarioInicioComboBox.value)
-//            if (atualizar) {
-//                vbox.children.clear()
-//                primaryStage.scene = gerenciarPalestrasScene()
-//            } else {
-//                println("Erro ao atualizar horário da palestra!")
-//            }
+            val atualizar = palestraDAO.updatePalestra(
+                palestra,
+                inputDuracao.text.toLong(),
+                LocalTime.parse(comboBoxHorarioInicio.value),
+                LocalTime.parse(inputHorarioFim.text)
+            )
+            if (atualizar) {
+                println(atualizar)
+                vbox.children.clear()
+                evento.agenda.atualizarHorarioPalestra(
+                    palestra,
+                    inputDuracao.text.toLong(),
+                    LocalTime.parse(comboBoxHorarioInicio.value),
+                    LocalTime.parse(inputHorarioFim.text)
+                )
+                println("Palestra atualizada!")
+                primaryStage.scene = gerenciarPalestrasScene()
+                loadDataDB(usuarioLogado, evento, palestraDAO, participanteDAO)
+                // TODO: notificar usuários inscritos
+            } else {
+                println("Erro ao atualizar horário da palestra!")
+            }
             modalStage.close()
         }
 
@@ -386,13 +444,13 @@ class TelaGerenciarPalestras(
             modalStage.close()
         }
 
-
+        val vboxDuracao = VBox(10.0, duracaoLabel, inputDuracao)
         val vboxPalestra = VBox(10.0, tituloLabel, dataLabel, localLabel, limLabel)
-        val vboxHorarioInicio = VBox(10.0, horarioInicioLabel, horarioInicioComboBox)
-        val vboxHorarioFim = VBox(10.0, horarioFimLabel, horarioFimComboBox)
+        val vboxHorarioInicio = VBox(10.0, horarioInicioLabel, comboBoxHorarioInicio)
+        val vboxHorarioFim = VBox(10.0, horarioFimLabel, inputHorarioFim)
         val hboxBtn = HBox(10.0, btnConfirmar, btnVoltar)
-        val vbox = VBox(10.0, vboxPalestra, vboxHorarioInicio, vboxHorarioFim, hboxBtn)
-        val modalScene = Scene(vbox, 400.0, 150.0)
+        val vbox = VBox(10.0, vboxPalestra, vboxDuracao, vboxHorarioInicio, vboxHorarioFim, hboxBtn)
+        val modalScene = Scene(vbox, 500.0, 350.0)
 
         modalStage.scene = modalScene
         modalStage.showAndWait()

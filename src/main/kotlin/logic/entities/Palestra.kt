@@ -13,7 +13,7 @@ data class Palestra(
     val limiteParticipantes: Int,
     val local: String,
     val data: LocalDate,
-    val duracao: Long,
+    var duracao: Long,
     var horarioInicio: LocalTime,
     var horarioFim: LocalTime,
     var status: StatusEnum = StatusEnum.PENDENTE

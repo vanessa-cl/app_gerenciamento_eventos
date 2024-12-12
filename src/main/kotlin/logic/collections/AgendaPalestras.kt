@@ -28,14 +28,15 @@ class AgendaPalestras {
         return true
     }
 
-    fun atualizarHorarioPalestra(palestra: Palestra, horarioInicio: LocalTime, horarioFim: LocalTime): Boolean {
-        val resultado = buscarPalestraPeloTitulo(palestra.titulo)
+    fun atualizarHorarioPalestra(
+        palestra: Palestra,
+        duracao: Long,
+        horarioInicio: LocalTime,
+        horarioFim: LocalTime
+    ): Boolean {
+        val resultado = buscarPalestraPeloId(palestra.id)
         if (resultado != null) {
-            val conflito = verificarConflito(palestra.id, horarioInicio, horarioFim, resultado.local, resultado.data)
-            if (conflito) {
-                // TODO: erro de conflito de horários
-                return false
-            }
+            resultado.duracao = duracao
             resultado.horarioInicio = horarioInicio
             resultado.horarioFim = horarioFim
             return true
@@ -168,7 +169,7 @@ class AgendaPalestras {
             println(palestra)
         }
         return palestrasOrdenadas as Array<Palestra>
-        }
+    }
 
     fun estaVazia(): Boolean {
         return palestras.estaVazia()

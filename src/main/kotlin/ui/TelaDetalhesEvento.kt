@@ -13,6 +13,7 @@ import logic.entities.Evento
 import logic.entities.Palestra
 import logic.entities.Participante
 import util.ui.PalestrasUI
+import util.ui.loadDataDB
 
 class TelaDetalhesEvento(
     private val primaryStage: Stage,
@@ -26,7 +27,7 @@ class TelaDetalhesEvento(
     private val participanteDAO = ParticipanteDAO()
 
     init {
-        carregarDetalhesDB()
+        loadDataDB(usuarioLogado, evento, palestraDAO, participanteDAO)
     }
 
     fun detalhesEventoScene(): Scene {
@@ -73,23 +74,6 @@ class TelaDetalhesEvento(
         primaryStage.scene = scene
         primaryStage.show()
         return scene
-    }
-
-    private fun carregarDetalhesDB() {
-        usuarioLogado.inscricoes = palestraDAO.getSubscriptionsParticipante(evento.id, usuarioLogado.id)
-        val palestras = palestraDAO.getPalestras(evento.id)
-        evento.agenda = palestras
-        val todasPalestras = palestras.buscarTodasPalestras()
-
-        for (palestra in todasPalestras!!) {
-            if (palestra != null) {
-                val participantes =
-                    participanteDAO.getParticipantesPalestra(palestra.id, palestra.participantes.limiteParticipantes)
-                palestra.participantes = participantes
-                val filaEspera = participanteDAO.getParticipantesFilaEspera(palestra.id)
-                palestra.filaEspera = filaEspera
-            }
-        }
     }
 
     private fun agendaEventoScene(): Scene {

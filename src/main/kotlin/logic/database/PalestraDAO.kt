@@ -9,7 +9,7 @@ import java.time.LocalTime
 interface IPalestraDAO {
     fun getPalestras(idEvento: Int): AgendaPalestras
     fun insertPalestra(idEvento: Int, palestra: Palestra): Int?
-    fun updatePalestra(palestra: Palestra): Boolean
+    fun updatePalestra(palestra: Palestra, duracao: Long, horarioInicio: LocalTime, horarioFim: LocalTime): Boolean
     fun deletePalestra(idPalestra: Int): Boolean
     fun subscribeParticipante(idPalestra: Int, idParticipante: Int): Boolean
     fun unsubscribeParticipante(idPalestra: Int, idParticipante: Int): Boolean
@@ -73,15 +73,22 @@ class PalestraDAO : IPalestraDAO {
         return null
     }
 
-    override fun updatePalestra(palestra: Palestra): Boolean {
+    override fun updatePalestra(
+        palestra: Palestra,
+        duracao: Long,
+        horarioInicio: LocalTime,
+        horarioFim: LocalTime
+    ): Boolean {
+        println(palestra.toString())
         val connection = DatabaseUtil.getConnection()
         val sql =
-            "UPDATE palestras SET horarioInicio = ?, horarioFim = ? WHERE id = ?"
+            "UPDATE palestras SET duracaoEmHoras = ?, horarioInicio = ?, horarioFim = ? WHERE id = ?"
         connection?.use {
             val statement = it.prepareStatement(sql)
-            statement.setString(6, palestra.horarioInicio.toString())
-            statement.setString(7, palestra.horarioFim.toString())
-            statement.setInt(9, palestra.id)
+            statement.setInt(1, duracao.toInt())
+            statement.setString(2, horarioInicio.toString())
+            statement.setString(3, horarioFim.toString())
+            statement.setInt(4, palestra.id)
             val linhasAlteradas = statement.executeUpdate()
             return linhasAlteradas > 0
         }

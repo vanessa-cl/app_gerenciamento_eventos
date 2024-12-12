@@ -182,7 +182,8 @@ class TelaGerenciarEventos(
                 init {
                     btn.setOnAction {
                         val evento = tableView.items[index]
-                        telaGerenciarPalestras = TelaGerenciarPalestras(primaryStage, evento, this@TelaGerenciarEventos)
+                        telaGerenciarPalestras =
+                            TelaGerenciarPalestras(primaryStage, evento, this@TelaGerenciarEventos, usuarioLogado)
                         primaryStage.scene = telaGerenciarPalestras.gerenciarPalestrasScene()
                     }
                 }
