@@ -219,10 +219,14 @@ class TelaGerenciarPalestras(
     private fun exibirPalestrasBox(): VBox {
         // TODO: adicionar filtro por data/horário
         val vbox = VBox(10.0)
+        val btnOrdenarPorDataHora = Button("Ordenar por data e horário")
+        val btnOrdenarPorId = Button("Ordenar por ID")
         resultadoLabel.textProperty().bind(resultadoText)
-
-        val palestras = palestraDAO.getPalestras(evento.id).buscarTodasPalestras()
-        if (palestras == null) {
+        var palestras: Array<Palestra> = arrayOf()
+        val palestrasDB = palestraDAO.getPalestras(evento.id)
+        if (!palestrasDB.estaVazia()) {
+            palestras = palestrasDB.buscarTodasPalestras().filterNotNull().toTypedArray()
+        } else {
             resultadoText.set("Não há palestras cadastradas para este evento")
             vbox.children.addAll(
                 resultadoLabel
@@ -230,38 +234,55 @@ class TelaGerenciarPalestras(
             return vbox
         }
 
+        btnOrdenarPorId.setOnAction {
+            palestras = palestrasDB.buscarTodasPalestras().filterNotNull().toTypedArray()
+            vbox.children.clear()
+            vbox.children.addAll(
+                btnOrdenarPorDataHora,
+                gerenciarPalestrasTable(palestras)
+            )
+        }
+        btnOrdenarPorDataHora.setOnAction {
+            palestras = palestrasDB.ordenarPalestrasPorHorario()
+            vbox.children.clear()
+            vbox.children.addAll(
+                btnOrdenarPorId,
+                gerenciarPalestrasTable(palestras)
+            )
+        }
+
+        val tableView = gerenciarPalestrasTable(palestras)
+
+        vbox.children.addAll(
+            btnOrdenarPorDataHora,
+            tableView
+        )
+        return vbox
+    }
+
+    private fun gerenciarPalestrasTable(palestras: Array<Palestra>): TableView<Palestra> {
         val tableView = TableView<Palestra>()
 
         val colId = TableColumn<Palestra, Int>("ID")
         colId.cellValueFactory = PropertyValueFactory("id")
-
         val colTitulo = TableColumn<Palestra, String>("Título")
         colTitulo.cellValueFactory = PropertyValueFactory("titulo")
-
         val colPalestrante = TableColumn<Palestra, String>("Palestrante")
         colPalestrante.cellValueFactory = PropertyValueFactory("palestrante")
-
         val colLocal = TableColumn<Palestra, String>("Local")
         colLocal.cellValueFactory = PropertyValueFactory("local")
-
         val colData = TableColumn<Palestra, String>("Data")
         colData.cellValueFactory = PropertyValueFactory("data")
-
         val colDuracao = TableColumn<Palestra, String>("Duração em Horas")
         colDuracao.cellValueFactory = PropertyValueFactory("duracao")
-
         val colHorarioInicio = TableColumn<Palestra, String>("Horário de Início")
         colHorarioInicio.cellValueFactory = PropertyValueFactory("horarioInicio")
-
         val colHorarioTermino = TableColumn<Palestra, String>("Horário de Término")
         colHorarioTermino.cellValueFactory = PropertyValueFactory("horarioFim")
-
         val colLimiteParticipantes = TableColumn<Palestra, Int>("Limite de Participantes")
         colLimiteParticipantes.cellValueFactory = PropertyValueFactory("limiteParticipantes")
-
         val colStatus = TableColumn<Palestra, StatusEnum>("Status")
         colStatus.cellValueFactory = PropertyValueFactory("status")
-
         val actionColumn = TableColumn<Palestra, Void>("Ações")
         actionColumn.setCellFactory {
             object : TableCell<Palestra, Void>() {
@@ -306,10 +327,7 @@ class TelaGerenciarPalestras(
 
         val data = FXCollections.observableArrayList(palestras.filterNotNull())
         tableView.items = data
-        vbox.children.addAll(
-            tableView
-        )
-        return vbox
+        return tableView
     }
 
     fun cancelarPalestraModal(palestra: Palestra) {

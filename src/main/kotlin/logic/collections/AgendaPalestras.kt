@@ -116,11 +116,12 @@ class AgendaPalestras {
         return null
     }
 
-    fun buscarTodasPalestras(): Array<Palestra?>? {
+    fun buscarTodasPalestras(): Array<Palestra?> {
         if (estaVazia()) {
             // TODO: erro de lista vazia
-            return null
+            return emptyArray()
         }
+
         val todasPalestras = palestras.selecionarTodos()
         val palestrasArray = convertArray<Palestra?>(todasPalestras)
         return palestrasArray
@@ -156,9 +157,9 @@ class AgendaPalestras {
         return resultado
     }
 
-    fun ordenarPalestrasPorHorario(): Array<Palestra>? {
+    fun ordenarPalestrasPorHorario(): Array<Palestra> {
         val todasPalestras = buscarTodasPalestras()
-        if (todasPalestras == null) {
+        if (todasPalestras.contentEquals(emptyArray())) {
             // TODO: erro de lista vazia
             return emptyArray()
         }
@@ -168,7 +169,7 @@ class AgendaPalestras {
         for (palestra in palestrasOrdenadas) {
             println(palestra)
         }
-        return palestrasOrdenadas as Array<Palestra>
+        return palestrasOrdenadas.toTypedArray()
     }
 
     fun estaVazia(): Boolean {
