@@ -1,5 +1,7 @@
 package ui
 
+import javafx.geometry.Insets
+import javafx.geometry.Pos
 import javafx.scene.Scene
 import javafx.scene.control.*
 import javafx.scene.layout.HBox
@@ -12,14 +14,18 @@ import logic.entities.Evento
 import logic.entities.Palestra
 import logic.entities.Participante
 import util.notifyUsers
+import util.ui.Header
 import util.ui.PalestrasUI
 
 class TelaDetalhesEvento(
     private val primaryStage: Stage,
+    private val mainApp: MainApp,
     private val evento: Evento,
     private val telaMenuEventos: TelaMenuEventos,
     private val usuarioLogado: Participante
 ) {
+    private var titulo = "Detalhes do Evento"
+    private val header = Header(primaryStage, mainApp, usuarioLogado, titulo)
     private val vbox = VBox(10.0)
     private val palestraDAO = PalestraDAO()
     private val palestrasUI = PalestrasUI()
@@ -50,27 +56,23 @@ class TelaDetalhesEvento(
     }
 
     fun detalhesEventoScene(): Scene {
-        val pageLabel = Label(evento.nome)
-        val vboxInfo = VBox(10.0)
-        val infoLabel = Label("Detalhes do Evento")
-        val descricaoLabel = Label("Descrição: ${evento.descricao}")
-        val periodoLabel = Label("Período: ${evento.dataInicio} até ${evento.dataFim}")
-        val valorInscricaoLabel = Label("Valor da inscrição: ${evento.valorInscricao}")
+        val detalhesEventoVbox = VBox(10.0)
+        detalhesEventoVbox.children.add(header.getHeader())
+
+        val informacoesVbox = VBox(10.0)
+        informacoesVbox.children.addAll(
+            Label("Nome: ${evento.nome}"),
+            Label("Descrição: ${evento.descricao}"),
+            Label("Período: ${evento.dataInicio} até ${evento.dataFim}"),
+            Label("Valor da inscrição: ${evento.valorInscricao}")
+        )
+
         val btnVoltar = Button("Voltar")
         btnVoltar.setOnAction {
             vbox.children.clear()
             primaryStage.scene = telaMenuEventos.menuEventosScene()
         }
-        vboxInfo.children.addAll(
-            pageLabel,
-            infoLabel,
-            descricaoLabel,
-            periodoLabel,
-            valorInscricaoLabel,
-            btnVoltar
-        )
 
-        val hboxActions = HBox(10.0)
         val btnConsultarAgenda = Button("Consultar agenda do evento")
         btnConsultarAgenda.setOnAction {
             vbox.children.clear()
@@ -81,14 +83,19 @@ class TelaDetalhesEvento(
             vbox.children.clear()
             primaryStage.scene = this.inscricoesUsuarioScene()
         }
-        hboxActions.children.addAll(btnConsultarAgenda, btnMinhasInscricoes)
 
-        vbox.children.addAll(
-            vboxInfo,
-            hboxActions
+        detalhesEventoVbox.children.addAll(
+            VBox(10.0,
+                HBox(10.0, Label(evento.nome)).apply { alignment = Pos.TOP_LEFT },
+                informacoesVbox.apply { alignment = Pos.TOP_LEFT },
+                HBox(10.0, btnVoltar).apply { alignment = Pos.BOTTOM_RIGHT },
+                HBox(10.0, Label("Opções")).apply { alignment = Pos.TOP_LEFT },
+                HBox(10.0, btnConsultarAgenda, btnMinhasInscricoes).apply { alignment = Pos.TOP_LEFT }
+            ).apply { alignment = Pos.TOP_LEFT; padding = Insets(10.0) },
         )
-        val titledPane = TitledPane("Detalhes do Evento", vbox)
-        val scene = Scene(titledPane, 1000.0, 600.0)
+
+        detalhesEventoVbox.apply { spacing = 10.0; padding = Insets(10.0) }
+        val scene = Scene(detalhesEventoVbox, 900.0, 400.0)
         primaryStage.title = "Detalhes do Evento"
         primaryStage.scene = scene
         primaryStage.show()
@@ -96,7 +103,9 @@ class TelaDetalhesEvento(
     }
 
     private fun agendaEventoScene(): Scene {
-        val pageLabel = Label("Agenda do Evento ${evento.nome}")
+        val agendaEventoVbox = VBox(10.0)
+        agendaEventoVbox.children.add(header.getHeader())
+
         val palestras = evento.agenda.buscarTodasPalestras()
         if (palestras == null) {
             vbox.children.add(Label("Não há palestras cadastradas para este evento"))
@@ -104,19 +113,24 @@ class TelaDetalhesEvento(
 
         val actionColumn = palestrasUI.getActionCollumn("Inscreva-se", ::inscreverUsuarioPalestra)
         val tableView = palestrasUI.baseTablePalestras(palestras!!, actionColumn)
+
         val btnVoltar = Button("Voltar")
         btnVoltar.setOnAction {
             vbox.children.clear()
             primaryStage.scene = this.detalhesEventoScene()
         }
-        vbox.children.addAll(
-            pageLabel,
-            tableView,
-            btnVoltar
+
+        agendaEventoVbox.children.addAll(
+            VBox(
+                10.0,
+                HBox(10.0, Label("Agenda do Evento ${evento.nome}")).apply { alignment = Pos.TOP_LEFT },
+                tableView.apply { maxWidth = 950.0 },
+                HBox(10.0, btnVoltar).apply { alignment = Pos.BOTTOM_RIGHT }
+            ).apply { alignment = Pos.TOP_LEFT; padding = Insets(10.0) }
         )
 
-        val titledPane = TitledPane("Agenda do Evento", vbox)
-        val scene = Scene(titledPane, 1000.0, 600.0)
+        agendaEventoVbox.apply { spacing = 10.0; padding = Insets(10.0) }
+        val scene = Scene(agendaEventoVbox, 1000.0, 400.0)
         primaryStage.title = "Agenda do Evento"
         primaryStage.scene = scene
         primaryStage.show()
@@ -143,15 +157,16 @@ class TelaDetalhesEvento(
     }
 
     private fun inscricoesUsuarioScene(): Scene {
-        val pageLabel = Label("Minhas inscrições no Evento ${evento.nome}")
+        val inscricoesUsuarioVbox = VBox(10.0)
+        inscricoesUsuarioVbox.children.add(header.getHeader())
+
         val btnVoltar = Button("Voltar")
         btnVoltar.setOnAction {
-            vbox.children.clear()
             primaryStage.scene = this.detalhesEventoScene()
         }
         val palestras = usuarioLogado.inscricoes.buscarTodasPalestras()
         if (palestras.contentEquals(emptyArray())) {
-            vbox.children.addAll(
+            inscricoesUsuarioVbox.children.addAll(
                 Label("Você não está inscrito em nenhuma palestra deste evento"),
                 btnVoltar
             )
@@ -160,14 +175,17 @@ class TelaDetalhesEvento(
         val actionColumn = palestrasUI.getActionCollumn("Cancelar inscrição", ::cancelarInscricaoModal)
         val tableView = palestrasUI.baseTablePalestras(palestras, actionColumn)
 
-        vbox.children.addAll(
-            pageLabel,
-            tableView,
-            btnVoltar
+        inscricoesUsuarioVbox.children.addAll(
+            VBox(
+                10.0,
+                HBox(10.0, Label("Minhas inscrições no Evento ${evento.nome}")).apply { alignment = Pos.TOP_LEFT },
+                tableView.apply { maxWidth = 1300.0 },
+                HBox(10.0, btnVoltar).apply { alignment = Pos.BOTTOM_RIGHT }
+            ).apply { alignment = Pos.TOP_LEFT; padding = Insets(10.0) }
         )
 
-        val titledPane = TitledPane("Minhas inscrições", vbox)
-        val scene = Scene(titledPane, 1000.0, 600.0)
+        inscricoesUsuarioVbox.apply { spacing = 10.0; padding = Insets(10.0) }
+        val scene = Scene(inscricoesUsuarioVbox, 1000.0, 600.0)
         primaryStage.title = "Minhas inscrições"
         primaryStage.scene = scene
         primaryStage.show()
