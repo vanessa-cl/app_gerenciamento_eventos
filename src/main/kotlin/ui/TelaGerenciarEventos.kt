@@ -17,6 +17,7 @@ import util.ui.Header
 import java.time.LocalDate
 import javafx.geometry.Insets
 import util.ui.Alert
+import javafx.event.ActionEvent
 
 class TelaGerenciarEventos(
     private val primaryStage: Stage,
@@ -88,6 +89,23 @@ class TelaGerenciarEventos(
         linha2Hbox.apply { spacing = 10.0 }
 
         val btnConfirmar = Button("Cadastrar")
+
+        btnConfirmar.isDisable = true
+        val validarCampos = {
+            btnConfirmar.isDisable = inputNome.text.isEmpty() ||
+                    inputDataInicio.value == null ||
+                    inputDataTermino.value == null ||
+                    inputDescricao.text.isEmpty() ||
+                    inputValorInscricao.text.isEmpty() ||
+                    comboBoxTurno.selectionModel.isEmpty
+        }
+        inputNome.textProperty().addListener { _, _, _ -> validarCampos() }
+        inputDataInicio.valueProperty().addListener { _, _, _ -> validarCampos() }
+        inputDataTermino.valueProperty().addListener { _, _, _ -> validarCampos() }
+        inputDescricao.textProperty().addListener { _, _, _ -> validarCampos() }
+        inputValorInscricao.textProperty().addListener { _, _, _ -> validarCampos() }
+        comboBoxTurno.selectionModel.selectedItemProperty().addListener { _, _, _ -> validarCampos() }
+
         btnConfirmar.setOnAction {
             val inputNomeContent = inputNome.text
             val inputDataInicioContent = inputDataInicio.value
@@ -115,6 +133,7 @@ class TelaGerenciarEventos(
                 alert.showError("Cadastro de Evento", "Erro", "Erro ao cadastrar evento!")
             }
         }
+
 
         val btnVoltar = Button("Voltar")
         btnVoltar.setOnAction {

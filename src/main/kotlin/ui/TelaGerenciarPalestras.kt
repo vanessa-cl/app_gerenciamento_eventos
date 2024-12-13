@@ -106,6 +106,7 @@ class TelaGerenciarPalestras(
         val inputDuracao = TextField()
         val comboBoxHoraInicio = ComboBox<String>()
         val inputHoraTermino = TextField()
+        inputHoraTermino.isDisable = true
         val horarios = buscarHorarios(evento.turno)
         var palestrasExistentes: Array<Palestra?>? = null
 
@@ -126,6 +127,27 @@ class TelaGerenciarPalestras(
             VBox(Label("Horário de término:"), inputHoraTermino),
         )
         linha2Hbox.apply { spacing = 10.0 }
+        val btnConfirmar = Button("Cadastrar")
+        btnConfirmar.isDisable = true
+
+        val validarCampos = {
+            btnConfirmar.isDisable = inputTitulo.text.isEmpty() ||
+                    inputNomePalestrante.text.isEmpty() ||
+                    inputDuracao.text.isEmpty() ||
+                    inputLimitePart.text.isEmpty() ||
+                    inputLocal.text.isEmpty() ||
+                    inputData.value == null ||
+                    comboBoxHoraInicio.selectionModel.isEmpty ||
+                    inputHoraTermino.text.isEmpty()
+        }
+        inputTitulo.textProperty().addListener { _, _, _ -> validarCampos() }
+        inputNomePalestrante.textProperty().addListener { _, _, _ -> validarCampos() }
+        inputDuracao.textProperty().addListener { _, _, _ -> validarCampos() }
+        inputLocal.textProperty().addListener { _, _, _ -> validarCampos() }
+        inputData.valueProperty().addListener { _, _, _ -> validarCampos() }
+        comboBoxHoraInicio.selectionModel.selectedItemProperty().addListener { _, _, _ -> validarCampos() }
+        inputHoraTermino.textProperty().addListener { _, _, _ -> validarCampos() }
+
 
         inputData.valueProperty().addListener { _, _, valor ->
             palestrasExistentes = null
@@ -147,6 +169,8 @@ class TelaGerenciarPalestras(
                         }
                     }
                 }
+            } else {
+                comboBoxHoraInicio.isDisable = true
             }
         }
 
@@ -166,7 +190,6 @@ class TelaGerenciarPalestras(
             }
         }
 
-        val btnConfirmar = Button("Cadastrar")
         btnConfirmar.setOnAction {
             val novaPalestra =
                 Palestra(
@@ -438,6 +461,18 @@ class TelaGerenciarPalestras(
         )
         linha2Hbox.apply { spacing = 10.0 }
 
+        val btnConfirmar = Button("Confirmar")
+        btnConfirmar.isDisable = true
+
+        val validarCampos = {
+            btnConfirmar.isDisable = inputDuracao.text.isEmpty() ||
+                    comboBoxHorarioInicio.selectionModel.isEmpty ||
+                    inputHorarioFim.text.isEmpty()
+        }
+        inputDuracao.textProperty().addListener { _, _, _ -> validarCampos() }
+        comboBoxHorarioInicio.selectionModel.selectedItemProperty().addListener { _, _, _ -> validarCampos() }
+        inputHorarioFim.textProperty().addListener { _, _, _ -> validarCampos() }
+
         for (horario in horarios.selecionarTodos()) {
             if (horario == null) {
                 continue
@@ -482,7 +517,7 @@ class TelaGerenciarPalestras(
             }
         }
 
-        val btnConfirmar = Button("Confirmar")
+
         btnConfirmar.setOnAction {
             val atualizar = palestraDAO.updatePalestra(
                 palestra,

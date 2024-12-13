@@ -42,6 +42,15 @@ class MainApp : Application() {
         }
 
         val btnLogin = Button("Entrar")
+        btnLogin.isDisable = true
+        val validarCampos = {
+            btnLogin.isDisable = inputUsuario.text.isEmpty() ||
+                    inputCpf.text.isEmpty()
+        }
+        inputUsuario.textProperty().addListener { _, _, _ -> validarCampos() }
+        inputCpf.textProperty().addListener { _, _, _ -> validarCampos() }
+
+
         btnLogin.setOnAction {
             val usuario = participanteDAO.getParticipanteNomeCpf(inputUsuario.text, inputCpf.text)
             if (usuario == null) {
