@@ -16,6 +16,7 @@ import javafx.stage.Stage
 import logic.database.DatabaseInit
 import logic.database.EventoDAO
 import logic.database.ParticipanteDAO
+import util.ui.Alert
 
 class MainApp : Application() {
     private lateinit var initialScene: Scene
@@ -23,41 +24,46 @@ class MainApp : Application() {
     private val participanteDAO = ParticipanteDAO()
     private lateinit var todosEventos: ListaEventos
     private val root = VBox()
-    private val loginVbox = VBox()
+    private val alert = Alert()
 
     override fun start(primaryStage: Stage) {
+        val loginVbox = VBox()
         DatabaseInit.init()
         todosEventos = eventoDAO.getEventos()
 
-        val inputUsuario = TextField()
-        val inputCpf = TextField()
-        val usuarioBox = VBox(5.0, Label("Usuário:"), inputUsuario).apply {
+        val inputEmail = TextField()
+        val inputSenha = TextField()
+        val emailBox = VBox(5.0, Label("Email:"), inputEmail).apply {
             alignment = Pos.TOP_LEFT; maxWidth = 300.0
         }
-        val cpfBox = VBox(5.0, Label("CPF:"), inputCpf).apply {
+        val senhaBox = VBox(5.0, Label("Senha:"), inputSenha).apply {
             alignment = Pos.TOP_LEFT; maxWidth = 300.0
         }
-        val formLoginVbox = VBox(10.0, usuarioBox, cpfBox).apply {
+        val formLoginVbox = VBox(10.0, emailBox, senhaBox).apply {
             alignment = Pos.CENTER_LEFT; maxWidth = 300.0
         }
 
         val btnLogin = Button("Entrar")
         btnLogin.isDisable = true
         val validarCampos = {
-            btnLogin.isDisable = inputUsuario.text.isEmpty() ||
-                    inputCpf.text.isEmpty()
+            btnLogin.isDisable = inputEmail.text.isEmpty() ||
+                    inputSenha.text.isEmpty()
         }
-        inputUsuario.textProperty().addListener { _, _, _ -> validarCampos() }
-        inputCpf.textProperty().addListener { _, _, _ -> validarCampos() }
+        inputEmail.textProperty().addListener { _, _, _ -> validarCampos() }
+        inputSenha.textProperty().addListener { _, _, _ -> validarCampos() }
 
 
         btnLogin.setOnAction {
-            val usuario = participanteDAO.getParticipanteNomeCpf(inputUsuario.text, inputCpf.text)
+            val usuario = participanteDAO.getParticipanteEmail(inputEmail.text, inputSenha.text)
             if (usuario == null) {
-                formLoginVbox.children.add(Label("Usuário/Cpf inválido"))
+                alert.showError(
+                    "Falha na autenticação",
+                    "Erro!",
+                    "Verifique seu email/senha e tente novamente."
+                )
             } else {
-                inputUsuario.clear()
-                inputCpf.clear()
+                inputEmail.clear()
+                inputSenha.clear()
                 if (usuario.cargo == CargoEnum.COLABORADOR) {
                     val telaGerenciarEventos = TelaGerenciarEventos(primaryStage, this, todosEventos, usuario)
                     primaryStage.scene = telaGerenciarEventos.gerenciarEventosScene()
@@ -85,14 +91,6 @@ class MainApp : Application() {
             loginVbox
         )
         root.apply { alignment = Pos.TOP_CENTER; spacing = 10.0; padding = Insets(20.0, 0.0, 0.0, 0.0) }
-        // TODO: corrigir importação de arquivo de estilo
-//        val resource = javaClass.getResource("/MainApp/main.css")
-//        if (resource != null) {
-//            println("Arquivo de estilo encontrado: ${resource.path}")
-//            initialScene.stylesheets.add(resource.toExternalForm())
-//        } else {
-//            println("Erro ao carregar o arquivo de estilo")
-//        }
 
         initialScene = Scene(root, 900.0, 400.0)
         primaryStage.title = "Login"

@@ -6,21 +6,21 @@ import logic.entities.Participante
 import util.enums.CargoEnum
 
 interface IParticipanteDAO {
-    fun getParticipanteNomeCpf(nome: String, cpf: String): Participante?
+    fun getParticipanteEmail(email: String, senha: String): Participante?
     fun getParticipante(idParticipante: Int): Participante?
     fun getParticipantesPalestra(idPalestra: Int, limParticipantes: Int): ListaParticipantes
     fun getParticipantesFilaEspera(idPalestra: Int): FilaEspera
 }
 
 class ParticipanteDAO : IParticipanteDAO {
-    override fun getParticipanteNomeCpf(nome: String, cpf: String): Participante? {
+    override fun getParticipanteEmail(email: String, senha: String): Participante? {
         val connection = DatabaseUtil.getConnection()
         var participante: Participante? = null
-        val sql = "SELECT * FROM participantes WHERE nome = ? AND cpf = ?"
+        val sql = "SELECT * FROM participantes WHERE email = ? AND cpf = ?"
         connection?.use {
             val statement = it.prepareStatement(sql)
-            statement.setString(1, nome)
-            statement.setString(2, cpf)
+            statement.setString(1, email)
+            statement.setString(2, senha)
             val resultSet = statement.executeQuery()
             while (resultSet.next()) {
                 participante = Participante(
