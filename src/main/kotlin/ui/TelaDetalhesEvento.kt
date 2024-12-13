@@ -163,10 +163,12 @@ class TelaDetalhesEvento(
         }
         val palestras = usuarioLogado.inscricoes.buscarTodasPalestras()
         if (palestras.contentEquals(emptyArray())) {
-            inscricoesUsuarioVbox.children.addAll(
-                Label("Você não está inscrito em nenhuma palestra deste evento"),
-                btnVoltar
+            alert.showInfo(
+                "Minhas inscrições",
+                "Nenhuma inscrição encontrada",
+                "Você não está inscrito em nenhuma palestra deste evento!"
             )
+            return detalhesEventoScene()
         }
 
         val actionColumn = palestrasUI.getActionCollumn("Cancelar inscrição", ::cancelarInscricaoModal)
@@ -182,7 +184,7 @@ class TelaDetalhesEvento(
         )
 
         inscricoesUsuarioVbox.apply { spacing = 10.0; padding = Insets(10.0) }
-        val scene = Scene(inscricoesUsuarioVbox, 1000.0, 600.0)
+        val scene = Scene(inscricoesUsuarioVbox, 1000.0, 400.0)
         primaryStage.title = "Minhas inscrições"
         primaryStage.scene = scene
         primaryStage.show()

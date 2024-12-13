@@ -393,11 +393,11 @@ class TelaGerenciarPalestras(
             if (sucesso) {
                 evento.agenda.removerPalestraPeloId(palestra.id)
                 primaryStage.scene = gerenciarPalestrasScene()
+                alert.showInfo("Cancelar Palestra", "Sucesso", "Palestra cancelada com sucesso!")
                 notifyUsers(
                     "A palestra ${palestra.titulo} agendada para ${palestra.data} foi cancelada",
                     palestra.participantes.buscarTodosParticipantes()!!.filterNotNull().toTypedArray()
                 )
-                alert.showInfo("Cancelar Palestra", "Sucesso", "Palestra cancelada com sucesso!")
             } else {
                 alert.showError("Cancelar Palestra", "Erro", "Erro ao cancelar palestra!")
             }
@@ -517,7 +517,6 @@ class TelaGerenciarPalestras(
             }
         }
 
-
         btnConfirmar.setOnAction {
             val atualizar = palestraDAO.updatePalestra(
                 palestra,
@@ -535,11 +534,11 @@ class TelaGerenciarPalestras(
                 println("Palestra atualizada!")
                 primaryStage.scene = gerenciarPalestrasScene()
                 loadDataDB()
+                alert.showInfo("Atualizar Horário", "Sucesso", "Horário da palestra atualizado com sucesso!")
                 notifyUsers(
                     "O horário da palestra ${palestra.titulo} foi atualizado para às ${comboBoxHorarioInicio.value}",
                     palestra.participantes.buscarTodosParticipantes()!!.filterNotNull().toTypedArray()
                 )
-                alert.showInfo("Atualizar Horário", "Sucesso", "Horário da palestra atualizado com sucesso!")
             } else {
                 alert.showError("Atualizar Horário", "Erro", "Erro ao atualizar horário da palestra!")
             }

@@ -17,7 +17,6 @@ import util.ui.Header
 import java.time.LocalDate
 import javafx.geometry.Insets
 import util.ui.Alert
-import javafx.event.ActionEvent
 
 class TelaGerenciarEventos(
     private val primaryStage: Stage,
