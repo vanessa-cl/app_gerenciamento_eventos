@@ -160,6 +160,7 @@ class TelaGerenciarPalestras(
                         continue
                     } else {
                         if (isHorarioDisponivel(
+                                inputLocal.text,
                                 LocalTime.parse(horario.toString()),
                                 inputDuracao.text.toLong(),
                                 palestrasExistentes
@@ -184,7 +185,7 @@ class TelaGerenciarPalestras(
             inputHoraTermino.clear()
             if (valor != null && inputDuracao.text != null && palestrasExistentes != null) {
                 val horaInicio = LocalTime.parse(valor)
-                if (isHorarioDisponivel(horaInicio, inputDuracao.text.toLong(), palestrasExistentes)) {
+                if (isHorarioDisponivel(inputLocal.text, horaInicio, inputDuracao.text.toLong(), palestrasExistentes)) {
                     inputHoraTermino.text = horaInicio.plusHours(inputDuracao.text.toLong()).toString()
                 }
             }
@@ -239,6 +240,7 @@ class TelaGerenciarPalestras(
     }
 
     private fun isHorarioDisponivel(
+        local: String,
         novaHoraInicio: LocalTime,
         novaDuracao: Long,
         palestras: Array<Palestra?>?
@@ -249,7 +251,7 @@ class TelaGerenciarPalestras(
             return true
         }
         for (palestra in palestras) {
-            if (palestra != null) {
+            if (palestra != null && palestra.local == local) {
                 val horaInicioExistente = palestra.horarioInicio
                 val horaTerminoExistente = palestra.horarioFim
 
@@ -478,6 +480,7 @@ class TelaGerenciarPalestras(
                 continue
             } else {
                 if (isHorarioDisponivel(
+                        palestra.local,
                         LocalTime.parse(horario.toString()),
                         palestra.duracao,
                         palestrasExistentes
@@ -496,6 +499,7 @@ class TelaGerenciarPalestras(
                     continue
                 } else {
                     if (isHorarioDisponivel(
+                            palestra.local,
                             LocalTime.parse(horario.toString()),
                             inputDuracao.text.toLong(),
                             palestrasExistentes
@@ -511,7 +515,7 @@ class TelaGerenciarPalestras(
             inputHorarioFim.clear()
             if (valor != null && inputDuracao.text != null && palestrasExistentes != null) {
                 val horaInicio = LocalTime.parse(valor)
-                if (isHorarioDisponivel(horaInicio, inputDuracao.text.toLong(), palestrasExistentes)) {
+                if (isHorarioDisponivel(palestra.local, horaInicio, inputDuracao.text.toLong(), palestrasExistentes)) {
                     inputHorarioFim.text = horaInicio.plusHours(inputDuracao.text.toLong()).toString()
                 }
             }
