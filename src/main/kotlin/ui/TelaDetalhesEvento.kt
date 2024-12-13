@@ -194,19 +194,18 @@ class TelaDetalhesEvento(
 
     private fun inscricaoPalestraModal(palestra: Palestra) {
         val modalStage = Stage()
+        val inscricaoPalestraVbox = VBox(10.0)
         modalStage.initModality(Modality.APPLICATION_MODAL)
         modalStage.title = "Inscrição na fila de espera"
-        val label = Label("A palestra ${palestra.titulo} atingiu a capacidade máxima de participantes.")
-        val subLabel =
-            Label("Você pode se inscrever em outra palestra ou entrar na lista de espera. Você será avisado assim que houver vagas disponíveis.")
+
         val btnOutraPalestra = Button("Escolher outra palestra")
         btnOutraPalestra.setOnAction {
             modalStage.close()
         }
+
         val btnFilaEspera = Button("Entrar na lista de espera")
         btnFilaEspera.setOnAction {
             val checarInscricao = palestra.filaEspera.buscarParticipantePeloId(usuarioLogado.id)
-
             if (checarInscricao != null) {
                 vbox.children.add(Label("Você já está inscrito na lista de espera desta palestra!"))
             } else {
@@ -220,19 +219,32 @@ class TelaDetalhesEvento(
             }
             modalStage.close()
         }
-        val hbox = HBox(10.0, btnOutraPalestra, btnFilaEspera)
-        val vboxModal = VBox(10.0, label, subLabel, hbox)
-        val modalScene = Scene(vboxModal, 400.0, 150.0)
 
+        inscricaoPalestraVbox.children.addAll(
+            VBox(
+                10.0,
+                Label("A palestra ${palestra.titulo} atingiu a capacidade máxima de participantes.").apply {
+                    alignment = Pos.TOP_LEFT; maxWidth = 300.0; isWrapText = true
+                },
+                Label("Você pode se inscrever em outra palestra ou entrar na lista de espera. Você será avisado assim que houver vagas disponíveis.").apply {
+                    alignment = Pos.TOP_LEFT; maxWidth = 300.0; isWrapText = true
+                },
+                HBox(10.0, btnOutraPalestra, btnFilaEspera).apply { alignment = Pos.BOTTOM_RIGHT }
+            ).apply { alignment = Pos.TOP_LEFT; padding = Insets(10.0) }
+        )
+
+        inscricaoPalestraVbox.apply { spacing = 10.0; padding = Insets(10.0) }
+        val modalScene = Scene(inscricaoPalestraVbox, 400.0, 200.0)
         modalStage.scene = modalScene
         modalStage.showAndWait()
     }
 
     fun cancelarInscricaoModal(palestra: Palestra) {
+        val cancelarInscricaoVbox = VBox(10.0)
         val modalStage = Stage()
         modalStage.initModality(Modality.APPLICATION_MODAL)
         modalStage.title = "Cancelar inscrição"
-        val label = Label("Tem certeza que deseja cancelar a inscrição?")
+
         val btnConfirmar = Button("Confirmar")
         btnConfirmar.setOnAction {
             val inscricao = palestraDAO.unsubscribeParticipante(palestra.id, usuarioLogado.id)
@@ -246,13 +258,24 @@ class TelaDetalhesEvento(
             }
             modalStage.close()
         }
+
         val btnVoltar = Button("Voltar")
         btnVoltar.setOnAction {
             modalStage.close()
         }
-        val hbox = HBox(10.0, btnConfirmar, btnVoltar)
-        val vboxModal = VBox(10.0, label, hbox)
-        val modalScene = Scene(vboxModal, 400.0, 150.0)
+
+        cancelarInscricaoVbox.children.addAll(
+            VBox(
+                10.0,
+                Label("Tem certeza que deseja cancelar a inscrição na palestra ${palestra.titulo}?").apply {
+                    alignment = Pos.TOP_LEFT; maxWidth = 300.0; isWrapText = true
+                },
+                HBox(10.0, btnConfirmar, btnVoltar).apply { alignment = Pos.BOTTOM_RIGHT }
+            ).apply { alignment = Pos.TOP_LEFT; padding = Insets(10.0) }
+        )
+
+        cancelarInscricaoVbox.apply { spacing = 10.0; padding = Insets(10.0) }
+        val modalScene = Scene(cancelarInscricaoVbox, 400.0, 150.0)
         modalStage.scene = modalScene
         modalStage.showAndWait()
     }
