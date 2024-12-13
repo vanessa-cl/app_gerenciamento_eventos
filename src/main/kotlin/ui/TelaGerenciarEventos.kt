@@ -1,6 +1,5 @@
 package ui
 
-import javafx.beans.property.SimpleStringProperty
 import javafx.collections.FXCollections
 import javafx.geometry.Pos
 import logic.entities.Participante
@@ -17,6 +16,7 @@ import logic.database.EventoDAO
 import util.ui.Header
 import java.time.LocalDate
 import javafx.geometry.Insets
+import util.ui.Alert
 
 class TelaGerenciarEventos(
     private val primaryStage: Stage,
@@ -26,23 +26,30 @@ class TelaGerenciarEventos(
 ) {
     private var titulo = "Gerenciamento de Eventos"
     private val header = Header(primaryStage, mainApp, usuarioLogado, titulo)
-    private val resultadoText = SimpleStringProperty()
-    private var resultadoLabel = Label()
+    private val alert = Alert()
     private lateinit var telaGerenciarPalestras: TelaGerenciarPalestras
     private val eventoDAO = EventoDAO()
 
     fun gerenciarEventosScene(): Scene {
         val gerenciarEventosVBox = VBox(10.0)
         gerenciarEventosVBox.children.add(header.getHeader())
+
         val btnCadastro = Button("Cadastrar novo evento")
         btnCadastro.setOnAction {
             primaryStage.scene = cadastrarEventoScene()
         }
 
-        gerenciarEventosVBox.children.addAll(
-            exibirEventosBox().apply { alignment = Pos.CENTER; maxWidth = 1300.0 },
-            HBox(10.0, btnCadastro).apply { alignment = Pos.BOTTOM_RIGHT }
-        )
+        val eventosTable = exibirEventosBox()
+        if (eventosTable != null) {
+            gerenciarEventosVBox.children.addAll(
+                eventosTable.apply { alignment = Pos.CENTER; maxWidth = 1300.0 },
+                HBox(10.0, btnCadastro).apply { alignment = Pos.BOTTOM_RIGHT }
+            )
+        } else {
+            gerenciarEventosVBox.children.addAll(
+                HBox(10.0, btnCadastro).apply { alignment = Pos.BOTTOM_RIGHT }
+            )
+        }
 
         gerenciarEventosVBox.apply { spacing = 10.0; padding = Insets(10.0) }
         val scene = Scene(gerenciarEventosVBox, 1300.0, 600.0)
@@ -55,9 +62,6 @@ class TelaGerenciarEventos(
     private fun cadastrarEventoScene(): Scene {
         val cadastrarEventoVbox = VBox(10.0)
         cadastrarEventoVbox.children.add(header.getHeader())
-
-        resultadoLabel.textProperty().bind(resultadoText)
-        resultadoText.set("")
 
         val inputNome = TextField()
         val inputDataInicio = DatePicker()
@@ -106,9 +110,9 @@ class TelaGerenciarEventos(
             if (idGerado != null) {
                 novoEvento.id = idGerado
                 eventos.inserirEvento(novoEvento)
-                resultadoText.set("Evento cadastrado com sucesso!")
+                alert.showInfo("Cadastro de Evento", "Sucesso", "Evento cadastrado com sucesso!")
             } else {
-                resultadoText.set("Erro ao cadastrar evento!")
+                alert.showError("Cadastro de Evento", "Erro", "Erro ao cadastrar evento!")
             }
         }
 
@@ -120,9 +124,7 @@ class TelaGerenciarEventos(
         cadastrarEventoVbox.children.addAll(
             VBox(
                 10.0,
-                Label("Preencha os campos abaixo para cadastrar um novo evento:").apply {
-                    alignment = Pos.TOP_LEFT
-                },
+                Label("Preencha os campos abaixo para cadastrar um novo evento:").apply { alignment = Pos.TOP_LEFT },
                 linha1Hbox,
                 linha2Hbox,
                 HBox(10.0, btnConfirmar, btnVoltar).apply { alignment = Pos.BOTTOM_RIGHT }
@@ -137,16 +139,12 @@ class TelaGerenciarEventos(
         return scene
     }
 
-    private fun exibirEventosBox(): VBox {
+    private fun exibirEventosBox(): VBox? {
         val vbox = VBox(10.0)
-        resultadoLabel.textProperty().bind(resultadoText)
         val eventos = eventos.buscarTodosEventos()
         if (eventos == null) {
-            resultadoText.set("Não há eventos cadastrados!")
-            vbox.children.addAll(
-                resultadoLabel
-            )
-            return vbox
+            alert.showInfo("Gerenciamento de Eventos", "Nenhum evento encontrado", "Nenhum evento encontrado!")
+            return null
         }
 
         val table = gerenciarEventosTable(eventos)

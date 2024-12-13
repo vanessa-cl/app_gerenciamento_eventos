@@ -4,7 +4,6 @@ import javafx.collections.FXCollections
 import javafx.scene.Scene
 import javafx.scene.control.*
 import javafx.scene.control.cell.PropertyValueFactory
-import javafx.beans.property.SimpleStringProperty
 import javafx.geometry.Insets
 import javafx.geometry.Pos
 import javafx.scene.layout.HBox
@@ -21,6 +20,7 @@ import logic.structures.ListaEstatica
 import util.enums.StatusEnum
 import util.enums.TurnoEnum
 import util.notifyUsers
+import util.ui.Alert
 import util.ui.Header
 import java.time.LocalTime
 
@@ -33,15 +33,12 @@ class TelaGerenciarPalestras(
 ) {
     private var titulo = "Gerenciamento de Palestras do Evento ${evento.nome}"
     private val header = Header(primaryStage, mainApp, usuarioLogado, titulo)
-    private var vbox = VBox(10.0)
-    private val resultadoText = SimpleStringProperty()
-    private var resultadoLabel = Label()
+    private val alert = Alert()
     private val palestraDAO = PalestraDAO()
     private val participanteDAO = ParticipanteDAO()
     private val horarioDAO = HorarioDAO()
 
     init {
-        resultadoLabel.textProperty().bind(resultadoText)
         loadDataDB()
     }
 
@@ -77,10 +74,17 @@ class TelaGerenciarPalestras(
             primaryStage.scene = telaGerenciarEventos.gerenciarEventosScene()
         }
 
-        gerenciarPalestrasVBox.children.addAll(
-            exibirPalestrasBox().apply { alignment = Pos.CENTER; maxWidth = 1300.0 },
-            HBox(10.0, btnCadastro, btnVoltar).apply { alignment = Pos.BOTTOM_RIGHT }
-        )
+        val palestrasTable = exibirPalestrasBox()
+        if (palestrasTable != null) {
+            gerenciarPalestrasVBox.children.addAll(
+                palestrasTable.apply { alignment = Pos.CENTER; maxWidth = 1300.0 },
+                HBox(10.0, btnCadastro, btnVoltar).apply { alignment = Pos.BOTTOM_RIGHT }
+            )
+        } else {
+            gerenciarPalestrasVBox.children.addAll(
+                HBox(10.0, btnCadastro, btnVoltar).apply { alignment = Pos.BOTTOM_RIGHT }
+            )
+        }
 
         gerenciarPalestrasVBox.apply { spacing = 10.0; padding = Insets(10.0) }
         val scene = Scene(gerenciarPalestrasVBox, 1300.0, 600.0)
@@ -93,9 +97,6 @@ class TelaGerenciarPalestras(
     private fun cadastrarPalestraScene(): Scene {
         val cadastrarPalestraVbox = VBox(10.0)
         cadastrarPalestraVbox.children.add(header.getHeader())
-
-        resultadoLabel.textProperty().bind(resultadoText)
-        resultadoText.set("")
 
         val inputTitulo = TextField()
         val inputNomePalestrante = TextField()
@@ -183,9 +184,9 @@ class TelaGerenciarPalestras(
             if (idGerado != null) {
                 novaPalestra.id = idGerado
                 evento.agenda.inserirPalestra(novaPalestra)
-                resultadoText.set("Palestra cadastrada com sucesso!")
+                alert.showInfo("Cadastro de Palestra", "Sucesso", "Palestra cadastrada com sucesso!")
             } else {
-                resultadoText.set("Erro ao cadastrar palestra!")
+                alert.showError("Cadastro de Palestra", "Erro", "Erro ao cadastrar palestra!")
             }
         }
 
@@ -247,21 +248,18 @@ class TelaGerenciarPalestras(
         return true
     }
 
-    private fun exibirPalestrasBox(): VBox {
+    private fun exibirPalestrasBox(): VBox? {
         val vbox = VBox(10.0)
         val btnOrdenarPorDataHora = Button("Ordenar por data e horário")
         val btnOrdenarPorId = Button("Ordenar por ID")
-        resultadoLabel.textProperty().bind(resultadoText)
+
         var palestras: Array<Palestra> = arrayOf()
         val palestrasDB = palestraDAO.getPalestras(evento.id)
         if (!palestrasDB.estaVazia()) {
             palestras = palestrasDB.buscarTodasPalestras().filterNotNull().toTypedArray()
         } else {
-            resultadoText.set("Não há palestras cadastradas para este evento")
-            vbox.children.addAll(
-                resultadoLabel
-            )
-            return vbox
+            alert.showInfo("Gerenciamento de Palestras", "Nenhuma palestra encontrada", "Nenhuma palestra encontrada!")
+            return null
         }
 
         btnOrdenarPorId.setOnAction {
@@ -371,14 +369,14 @@ class TelaGerenciarPalestras(
             val sucesso = palestraDAO.deletePalestra(palestra.id)
             if (sucesso) {
                 evento.agenda.removerPalestraPeloId(palestra.id)
-                vbox.children.clear()
                 primaryStage.scene = gerenciarPalestrasScene()
                 notifyUsers(
                     "A palestra ${palestra.titulo} agendada para ${palestra.data} foi cancelada",
                     palestra.participantes.buscarTodosParticipantes()!!.filterNotNull().toTypedArray()
                 )
+                alert.showInfo("Cancelar Palestra", "Sucesso", "Palestra cancelada com sucesso!")
             } else {
-                println("Erro ao cancelar palestra!")
+                alert.showError("Cancelar Palestra", "Erro", "Erro ao cancelar palestra!")
             }
             modalStage.close()
         }
@@ -493,7 +491,6 @@ class TelaGerenciarPalestras(
                 LocalTime.parse(inputHorarioFim.text)
             )
             if (atualizar) {
-                vbox.children.clear()
                 evento.agenda.atualizarHorarioPalestra(
                     palestra,
                     inputDuracao.text.toLong(),
@@ -507,8 +504,9 @@ class TelaGerenciarPalestras(
                     "O horário da palestra ${palestra.titulo} foi atualizado para às ${comboBoxHorarioInicio.value}",
                     palestra.participantes.buscarTodosParticipantes()!!.filterNotNull().toTypedArray()
                 )
+                alert.showInfo("Atualizar Horário", "Sucesso", "Horário da palestra atualizado com sucesso!")
             } else {
-                println("Erro ao atualizar horário da palestra!")
+                alert.showError("Atualizar Horário", "Erro", "Erro ao atualizar horário da palestra!")
             }
             modalStage.close()
         }

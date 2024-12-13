@@ -14,6 +14,7 @@ import logic.entities.Evento
 import logic.entities.Palestra
 import logic.entities.Participante
 import util.notifyUsers
+import util.ui.Alert
 import util.ui.Header
 import util.ui.PalestrasUI
 
@@ -26,7 +27,7 @@ class TelaDetalhesEvento(
 ) {
     private var titulo = "Detalhes do Evento"
     private val header = Header(primaryStage, mainApp, usuarioLogado, titulo)
-    private val vbox = VBox(10.0)
+    private val alert = Alert()
     private val palestraDAO = PalestraDAO()
     private val palestrasUI = PalestrasUI()
     private val participanteDAO = ParticipanteDAO()
@@ -69,18 +70,15 @@ class TelaDetalhesEvento(
 
         val btnVoltar = Button("Voltar")
         btnVoltar.setOnAction {
-            vbox.children.clear()
             primaryStage.scene = telaMenuEventos.menuEventosScene()
         }
 
         val btnConsultarAgenda = Button("Consultar agenda do evento")
         btnConsultarAgenda.setOnAction {
-            vbox.children.clear()
             primaryStage.scene = this.agendaEventoScene()
         }
         val btnMinhasInscricoes = Button("Minhas inscrições")
         btnMinhasInscricoes.setOnAction {
-            vbox.children.clear()
             primaryStage.scene = this.inscricoesUsuarioScene()
         }
 
@@ -108,7 +106,7 @@ class TelaDetalhesEvento(
 
         val palestras = evento.agenda.buscarTodasPalestras()
         if (palestras == null) {
-            vbox.children.add(Label("Não há palestras cadastradas para este evento"))
+            alert.showInfo("Agenda do Evento", "Nenhuma palestra encontrada", "Nenhuma palestra encontrada!")
         }
 
         val actionColumn = palestrasUI.getActionCollumn("Inscreva-se", ::inscreverUsuarioPalestra)
@@ -116,7 +114,6 @@ class TelaDetalhesEvento(
 
         val btnVoltar = Button("Voltar")
         btnVoltar.setOnAction {
-            vbox.children.clear()
             primaryStage.scene = this.detalhesEventoScene()
         }
 
@@ -145,14 +142,14 @@ class TelaDetalhesEvento(
             if (inscricao) {
                 palestra.participantes.inserirParticipante(usuarioLogado)
                 usuarioLogado.inscricoes.inserirPalestra(palestra)
-                vbox.children.add(Label("Inscrição realizada com sucesso!"))
+                alert.showInfo("Inscrição na palestra", "Sucesso", "Inscrição realizada com sucesso!")
             } else {
-                vbox.children.add(Label("Erro ao realizar inscrição"))
+                alert.showError("Inscrição na palestra", "Erro", "Erro ao realizar inscrição!")
             }
         } else if (checarInscricao == null && palestra.participantes.estaCheia()) {
             inscricaoPalestraModal(palestra)
         } else {
-            vbox.children.add(Label("Você já está inscrito nesta palestra!"))
+            alert.showInfo("Inscrição na palestra", "Inscrição já realizada", "Você já está inscrito nesta palestra!")
         }
     }
 
@@ -207,14 +204,22 @@ class TelaDetalhesEvento(
         btnFilaEspera.setOnAction {
             val checarInscricao = palestra.filaEspera.buscarParticipantePeloId(usuarioLogado.id)
             if (checarInscricao != null) {
-                vbox.children.add(Label("Você já está inscrito na lista de espera desta palestra!"))
+                alert.showInfo(
+                    "Inscrição na lista de espera",
+                    "Inscrição já realizada",
+                    "Você já está inscrito na lista de espera desta palestra!"
+                )
             } else {
                 val inscricao = palestraDAO.subscribeParticipanteFilaEspera(palestra.id, usuarioLogado.id)
                 if (!inscricao) {
-                    vbox.children.add(Label("Erro ao realizar inscrição na lista de espera"))
+                    alert.showError("Inscrição na lista de espera", "Erro", "Erro ao realizar inscrição!")
                 } else {
                     palestra.filaEspera.inserirParticipanteFim(usuarioLogado)
-                    vbox.children.add(Label("Inscrição na lista de espera realizada com sucesso!"))
+                    alert.showInfo(
+                        "Inscrição na lista de espera",
+                        "Sucesso",
+                        "Inscrição realizada com sucesso! Você será avisado assim que houver vagas disponíveis."
+                    )
                 }
             }
             modalStage.close()
@@ -251,10 +256,10 @@ class TelaDetalhesEvento(
             if (inscricao) {
                 palestra.participantes.removerParticipantePeloId(usuarioLogado.id)
                 usuarioLogado.inscricoes.removerPalestraPeloId(palestra.id)
-                vbox.children.add(Label("Inscrição cancelada com sucesso!"))
+                alert.showInfo("Cancelamento de inscrição", "Sucesso", "Inscrição cancelada com sucesso!")
                 moverFilaEspera(palestra)
             } else {
-                vbox.children.add(Label("Erro ao cancelar inscrição"))
+                alert.showError("Cancelamento de inscrição", "Erro", "Erro ao cancelar inscrição!")
             }
             modalStage.close()
         }
