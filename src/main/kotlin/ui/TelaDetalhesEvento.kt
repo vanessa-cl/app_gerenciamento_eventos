@@ -16,7 +16,7 @@ import logic.entities.Participante
 import util.notifyUsers
 import util.ui.Alert
 import util.ui.Header
-import util.ui.PalestrasUI
+import util.ui.PalestrasTable
 
 class TelaDetalhesEvento(
     private val primaryStage: Stage,
@@ -29,7 +29,7 @@ class TelaDetalhesEvento(
     private val header = Header(primaryStage, mainApp, usuarioLogado, titulo)
     private val alert = Alert()
     private val palestraDAO = PalestraDAO()
-    private val palestrasUI = PalestrasUI()
+    private val palestrasTable = PalestrasTable()
     private val participanteDAO = ParticipanteDAO()
 
     init {
@@ -109,8 +109,8 @@ class TelaDetalhesEvento(
             alert.showInfo("Agenda do Evento", "Nenhuma palestra encontrada", "Nenhuma palestra encontrada!")
         }
 
-        val actionColumn = palestrasUI.getActionCollumn("Inscreva-se", ::inscreverUsuarioPalestra)
-        val tableView = palestrasUI.baseTablePalestras(palestras!!, actionColumn)
+        val actionColumn = palestrasTable.getActionCollumn("Inscreva-se", ::inscreverUsuarioPalestra)
+        val tableView = palestrasTable.baseTablePalestras(palestras!!, actionColumn)
 
         val btnVoltar = Button("Voltar")
         btnVoltar.setOnAction {
@@ -171,8 +171,8 @@ class TelaDetalhesEvento(
             return detalhesEventoScene()
         }
 
-        val actionColumn = palestrasUI.getActionCollumn("Cancelar inscrição", ::cancelarInscricaoModal)
-        val tableView = palestrasUI.baseTablePalestras(palestras, actionColumn)
+        val actionColumn = palestrasTable.getActionCollumn("Cancelar inscrição", ::cancelarInscricaoModal)
+        val tableView = palestrasTable.baseTablePalestras(palestras, actionColumn)
 
         inscricoesUsuarioVbox.children.addAll(
             VBox(

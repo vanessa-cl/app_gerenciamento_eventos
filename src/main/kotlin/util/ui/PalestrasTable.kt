@@ -9,7 +9,7 @@ import javafx.scene.control.cell.PropertyValueFactory
 import logic.entities.Palestra
 import util.enums.StatusEnum
 
-class PalestrasUI {
+class PalestrasTable {
 
     fun getActionCollumn(buttonLabel: String, action: (Palestra) -> Unit): TableColumn<Palestra, Void> {
         val actionColumn = TableColumn<Palestra, Void>("Ações")
